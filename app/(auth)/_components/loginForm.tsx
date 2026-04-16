@@ -14,6 +14,8 @@ import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { PasswordInput } from "./passwordInput";
 import { Loader2 } from "lucide-react";
 import { usePostApiV1AuthLogin } from "@/api/auth/auth";
+import { handleMutation } from "@/lib/api/mutationWrapper";
+import { handleError } from "@/lib/api/handleError";
 
 /**
  * LoginForm Component
@@ -58,25 +60,13 @@ export function LoginForm({
       { data: values },
       {
         onSuccess: (res) => {
-          /**
-           * Handle API success/error based on status
-           */
-          if (res.status !== 200) {
-            toast.error(res.data?.error?.message || "Login failed");
-            return;
-          }
-
-          toast.success("Login successful");
-          //  redirect after login
-          router.replace("/tasks");
+          handleMutation(res, (_data, message) => {
+            toast.success(message || "Login successful");
+            router.replace("/tasks");
+          });
         },
-        onError: (error: any) => {
-          /**
-           * Handle network/server errors
-           */
-          toast.error(error?.message || "Something went wrong");
-        },
-      },
+        onError: handleError,
+      }
     );
   };
 
