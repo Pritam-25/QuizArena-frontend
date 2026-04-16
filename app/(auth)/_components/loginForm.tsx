@@ -9,21 +9,32 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { loginSchema, LoginInput } from "@/lib/schemas";
-import { request } from "@/lib/fetcher";
+import { loginSchema, LoginInput } from "@/lib/schemas/auth.schema";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { PasswordInput } from "@/components/ui/passwordInput";
+import { PasswordInput } from "./passwordInput";
 import { Loader2 } from "lucide-react";
-import { API } from "@/lib/api";
-import { useTransition } from "react";
+import { usePostApiV1AuthLogin } from "@/api/auth/auth";
 
+/**
+ * LoginForm Component
+ *
+ * @description
+ * - Handles user login using React Hook Form + Zod validation
+ * - Uses React Query mutation (Orval generated)
+ * - Displays validation + API errors
+ * - Redirects user on successful login
+ *
+ * @returns {JSX.Element}
+ */
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
+  /**
+   * React Hook Form setup with Zod validation
+   */
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,24 +43,41 @@ export function LoginForm({
     },
   });
 
+  /**
+   * React Query mutation for login
+   */
+  const { mutate, isPending } = usePostApiV1AuthLogin();
+
+  /**
+   * Handles form submission
+   *
+   * @param {LoginInput} values - User login credentials
+   */
   const onSubmit = (values: LoginInput) => {
-    startTransition(async () => {
-      const res = await request<{ user?: unknown; token?: string }>(
-        API.login,
-        "POST",
-        { data: values },
-        "Failed to login",
-      );
+    mutate(
+      { data: values },
+      {
+        onSuccess: (res) => {
+          /**
+           * Handle API success/error based on status
+           */
+          if (res.status !== 200) {
+            toast.error(res.data?.error?.message || "Login failed");
+            return;
+          }
 
-      if (!res.success) {
-        toast.error(res.errMsg);
-        return;
-      }
-
-      console.log("login: successful, redirecting to tasks page...");
-      toast.success(res.message || "Login successful!");
-      router.replace("/tasks");
-    });
+          toast.success("Login successful");
+          //  redirect after login
+          router.replace("/tasks");
+        },
+        onError: (error: any) => {
+          /**
+           * Handle network/server errors
+           */
+          toast.error(error?.message || "Something went wrong");
+        },
+      },
+    );
   };
 
   return (
@@ -63,6 +91,7 @@ export function LoginForm({
             <FieldGroup>
               <FieldSet>
                 <div className="flex flex-col gap-6">
+                  {/* Header */}
                   <div className="flex flex-col items-center text-center">
                     <h1 className="text-2xl font-bold">Welcome back</h1>
                     <p className="text-muted-foreground text-balance">
@@ -101,6 +130,7 @@ export function LoginForm({
                     )}
                   </Field>
 
+                  {/* Submit */}
                   <div className="flex justify-end">
                     <Button
                       type="submit"
@@ -118,6 +148,7 @@ export function LoginForm({
                     </Button>
                   </div>
 
+                  {/* Footer */}
                   <div className="text-center text-sm">
                     Don&apos;t have an account?{" "}
                     <Link
