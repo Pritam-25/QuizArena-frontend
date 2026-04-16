@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 
 export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  // Optional prop to toggle visibility control rendering; avoids empty extension of supertype
   withToggleButton?: boolean;
 }
 

@@ -17,6 +17,17 @@ import { usePostApiV1AuthRegister } from "@/api/auth/auth";
 import { handleMutation } from "@/lib/api/mutationWrapper";
 import { handleError } from "@/lib/api/handleError";
 
+/**
+ * SignUpForm Component
+ *
+ * @description
+ * - Handles user registration using React Hook Form + Zod validation
+ * - Uses React Query mutation (Orval generated)
+ * - Displays validation + API errors
+ * - Redirects user on successful signup
+ *
+ * @returns {JSX.Element}
+ */
 export function SignUpForm({
   className,
   ...props
@@ -25,6 +36,9 @@ export function SignUpForm({
 
   const { mutate, isPending } = usePostApiV1AuthRegister();
 
+  /**
+   * React Hook Form setup with Zod validation
+   */
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -33,6 +47,12 @@ export function SignUpForm({
       password: "",
     },
   });
+
+  /**
+   * Handles form submission
+   *
+   * @param {SignupInput} values - User registration credentials
+   */
   const onSubmit = (values: SignupInput) => {
     mutate(
       { data: values },

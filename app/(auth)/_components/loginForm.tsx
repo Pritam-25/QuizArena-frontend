@@ -62,7 +62,7 @@ export function LoginForm({
         onSuccess: (res) => {
           handleMutation(res, (_data, message) => {
             toast.success(message || "Login successful");
-            router.replace("/tasks");
+            router.replace("/");
           });
         },
         onError: handleError,
