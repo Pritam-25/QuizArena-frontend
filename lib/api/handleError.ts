@@ -1,6 +1,5 @@
 import { AppError } from "./api-error";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
 
 /**
  * Handles all frontend errors (API + network)
@@ -10,7 +9,11 @@ export function handleError(error: unknown) {
     // Handle auth globally
     if (error.statusCode === 401) {
       toast.error("Session expired. Please login again.");
-      redirect("/login");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+
+      return; //  prevent double toast
     }
     toast.error(error.message);
     return;
