@@ -5,24 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { SignupInput } from "@/lib/schemas";
-import { signupSchema } from "@/lib/schemas";
-import { useTransition } from "react";
-import { request } from "@/lib/fetcher";
+import { SignupInput, signupSchema } from "@/lib/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { PasswordInput } from "@/components/ui/passwordInput";
+import { PasswordInput } from "./passwordInput";
 import { Loader2 } from "lucide-react";
-import { API } from "@/lib/api";
-
-type UserResponse = {
-  username: string;
-  email: string;
-  id: string;
-};
+import { usePostApiV1AuthRegister } from "@/api/auth/auth";
+import { handleMutation } from "@/lib/api/mutationWrapper";
+import { handleError } from "@/lib/api/handleError";
 
 export function SignUpForm({
   className,
@@ -30,7 +23,7 @@ export function SignUpForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
 
-  const [isPending, startTransition] = useTransition();
+  const { mutate, isPending } = usePostApiV1AuthRegister();
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -41,23 +34,18 @@ export function SignUpForm({
     },
   });
   const onSubmit = (values: SignupInput) => {
-    startTransition(async () => {
-      const res = await request<{ user: UserResponse }>(
-        API.signup,
-        "POST",
-        { data: values },
-        "Failed to sign up",
-      );
-
-      if (!res.success) {
-        toast.error(res.errMsg);
-        return;
-      }
-
-      console.log("signup: successful, redirecting to tasks page...");
-      toast.success(res.message || "Successfully signed up!");
-      router.replace("/tasks");
-    });
+    mutate(
+      { data: values },
+      {
+        onSuccess: (res) => {
+          handleMutation(res, (_data, message) => {
+            toast.success(message || "Successfully signed up!");
+            router.replace("/login");
+          });
+        },
+        onError: handleError,
+      },
+    );
   };
 
   return (
@@ -129,9 +117,9 @@ export function SignUpForm({
                     <Button
                       type="submit"
                       className="w-full cursor-pointer"
-                      disabled={isPending}
+                      disabled={form.formState.isSubmitting || isPending}
                     >
-                      {isPending ? (
+                      {form.formState.isSubmitting || isPending ? (
                         <span className="flex items-center justify-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Signing up...

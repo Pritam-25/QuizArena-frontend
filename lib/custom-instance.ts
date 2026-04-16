@@ -1,8 +1,10 @@
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
 export const customInstance = async <T>(
   url: string,
   config: RequestInit = {}
 ): Promise<T> => {
-  const response = await fetch(url, {
+  const response = await fetch(`${baseUrl}${url}`, {
     ...config,
     headers: {
       'Content-Type': 'application/json',

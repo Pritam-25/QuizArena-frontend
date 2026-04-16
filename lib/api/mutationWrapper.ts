@@ -1,4 +1,4 @@
-import { handleApiResponse } from "./handleApi";
+import { ApiResponse, handleApiResponse } from "./handleApi";
 import { handleError } from "./handleError";
 
 /**
@@ -6,7 +6,7 @@ import { handleError } from "./handleError";
  */
 export function handleMutation<T>(
   res: any,
-  onSuccess?: (data: T, message?: string) => void
+  onSuccess?: (data: T, message?: string) => void,
 ) {
   try {
     const { data, message } = handleApiResponse<T>(res);

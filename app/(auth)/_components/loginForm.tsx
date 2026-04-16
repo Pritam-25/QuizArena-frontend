@@ -108,6 +108,7 @@ export function LoginForm({
 
                   {/* Password */}
                   <Field>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
                     <PasswordInput
                       id="password"
                       placeholder="••••••••"
