@@ -1,18 +1,14 @@
-import { env } from "./env";
-
-const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
-
 export const customInstance = async <T>(
   url: string,
-  config: RequestInit = {},
+  config: RequestInit = {}
 ): Promise<T> => {
-  const response = await fetch(`${baseUrl}${url}`, {
+  const response = await fetch(url, {
     ...config,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(config.headers ?? {}),
     },
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!response.ok) {
