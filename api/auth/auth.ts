@@ -10,9 +10,14 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -118,13 +123,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1AuthRegister = <TError = PostApiV1AuthRegister409,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthRegister>>, TError,{data: PostApiV1AuthRegisterBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1AuthRegister>>,
         TError,
         {data: PostApiV1AuthRegisterBody},
         TContext
       > => {
-      return useMutation(getPostApiV1AuthRegisterMutationOptions(options));
+      return useMutation(getPostApiV1AuthRegisterMutationOptions(options), queryClient);
     }
     /**
  * @summary Authenticate a user
@@ -207,13 +212,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1AuthLogin = <TError = PostApiV1AuthLogin401,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthLogin>>, TError,{data: PostApiV1AuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1AuthLogin>>,
         TError,
         {data: PostApiV1AuthLoginBody},
         TContext
       > => {
-      return useMutation(getPostApiV1AuthLoginMutationOptions(options));
+      return useMutation(getPostApiV1AuthLoginMutationOptions(options), queryClient);
     }
     /**
  * @summary Get current authenticated user
@@ -267,7 +272,7 @@ export const getGetApiV1AuthMeQueryKey = () => {
     }
 
 
-export const getGetApiV1AuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1AuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -282,25 +287,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetApiV1AuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AuthMe>>>
 export type GetApiV1AuthMeQueryError = GetApiV1AuthMe401
 
 
+export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuthMe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuthMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuthMe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuthMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get current authenticated user
  */
 
 export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiV1AuthMeQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
