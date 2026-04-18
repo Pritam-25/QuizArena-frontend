@@ -10,14 +10,9 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
   MutationFunction,
-  QueryClient,
   QueryFunction,
   QueryKey,
-  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -115,13 +110,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1Sessions = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Sessions>>, TError,{data: PostApiV1SessionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1Sessions>>,
         TError,
         {data: PostApiV1SessionsBody},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1SessionsMutationOptions(options));
     }
     /**
  * @summary Get session by id
@@ -175,7 +170,7 @@ export const getGetApiV1SessionsSessionIdQueryKey = (sessionId: string,) => {
     }
 
 
-export const getGetApiV1SessionsSessionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1SessionsSessionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -190,49 +185,25 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, enabled: !!(sessionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(sessionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type GetApiV1SessionsSessionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>>
 export type GetApiV1SessionsSessionIdQueryError = GetApiV1SessionsSessionId404
 
 
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get session by id
  */
 
 export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+ sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetApiV1SessionsSessionIdQueryOptions(sessionId,options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -316,13 +287,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1SessionsJoin = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsJoin>>, TError,{data: PostApiV1SessionsJoinBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1SessionsJoin>>,
         TError,
         {data: PostApiV1SessionsJoinBody},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsJoinMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1SessionsJoinMutationOptions(options));
     }
     /**
  * @summary Start session
@@ -397,11 +368,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1SessionsSessionIdStart = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>, TError,{sessionId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>,
         TError,
         {sessionId: string},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsSessionIdStartMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1SessionsSessionIdStartMutationOptions(options));
     }

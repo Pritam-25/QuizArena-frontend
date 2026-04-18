@@ -10,14 +10,9 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
   MutationFunction,
-  QueryClient,
   QueryFunction,
   QueryKey,
-  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -128,13 +123,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1Quizzes = <TError = PostApiV1Quizzes401,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Quizzes>>, TError,{data: PostApiV1QuizzesBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1Quizzes>>,
         TError,
         {data: PostApiV1QuizzesBody},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1QuizzesMutationOptions(options));
     }
     /**
  * @summary Get all quizzes
@@ -181,7 +176,7 @@ export const getGetApiV1QuizzesQueryKey = () => {
     }
 
 
-export const getGetApiV1QuizzesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1QuizzesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -196,49 +191,25 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type GetApiV1QuizzesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Quizzes>>>
 export type GetApiV1QuizzesQueryError = unknown
 
 
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1Quizzes>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1Quizzes>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1Quizzes>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1Quizzes>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all quizzes
  */
 
 export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetApiV1QuizzesQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -300,7 +271,7 @@ export const getGetApiV1QuizzesIdQueryKey = (id: string,) => {
     }
 
 
-export const getGetApiV1QuizzesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1QuizzesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -315,49 +286,25 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type GetApiV1QuizzesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1QuizzesId>>>
 export type GetApiV1QuizzesIdQueryError = GetApiV1QuizzesId404
 
 
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get quiz by id
  */
 
 export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetApiV1QuizzesIdQueryOptions(id,options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -449,13 +396,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1QuizzesQuizIdQuestions = <TError = PostApiV1QuizzesQuizIdQuestions401,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>, TError,{quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>,
         TError,
         {quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesQuizIdQuestionsMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1QuizzesQuizIdQuestionsMutationOptions(options));
     }
     /**
  * @summary Add options to question
@@ -532,13 +479,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePostApiV1QuizzesQuestionsQuestionIdOptions = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>, TError,{questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>,
         TError,
         {questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesQuestionsQuestionIdOptionsMutationOptions(options), queryClient);
+      return useMutation(getPostApiV1QuizzesQuestionsQuestionIdOptionsMutationOptions(options));
     }
     /**
  * @summary Reorder a question inside a quiz
@@ -617,11 +564,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const usePatchApiV1QuizzesQuizIdQuestionsQuestionIdReorder = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+ ): UseMutationResult<
         Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>,
         TError,
         {quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody},
         TContext
       > => {
-      return useMutation(getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationOptions(options), queryClient);
+      return useMutation(getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationOptions(options));
     }
