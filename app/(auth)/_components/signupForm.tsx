@@ -9,35 +9,28 @@ import { SignupInput, signupSchema } from "@/lib/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { PasswordInput } from "./passwordInput";
 import { Loader2 } from "lucide-react";
-import { usePostApiV1AuthRegister } from "@/api/auth/auth";
-import { handleMutation } from "@/lib/api/mutationWrapper";
-import { handleError } from "@/lib/api/handleError";
+import { useRegister } from "@/features/auth/hooks/useRegister";
 
 /**
  * SignUpForm Component
  *
  * @description
  * - Handles user registration using React Hook Form + Zod validation
- * - Uses React Query mutation (Orval generated)
- * - Displays validation + API errors
- * - Redirects user on successful signup
- *
- * @returns {JSX.Element}
+ * - Uses custom useRegister hook (React Query mutation)
+ * - Displays validation + API errors (handled by useRegister)
+ * - Redirects user to home page on successful signup
  */
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
-
-  const { mutate, isPending } = usePostApiV1AuthRegister();
-
   /**
    * React Hook Form setup with Zod validation
+   * @param {SignupSchema} - Zod schema for signup form validation
+   * - Ensures form data adheres to expected structure before submission
+   * - Provides form state management (e.g., errors, isSubmitting)
    */
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -49,23 +42,19 @@ export function SignUpForm({
   });
 
   /**
+   * @param {useRegister} - Custom hook for user registration (React Query mutation)
+   * - Abstracts API call, success handling (toast + redirect), and error handling
+   */
+
+  const { mutate, isPending } = useRegister();
+
+  /**
    * Handles form submission
    *
    * @param {SignupInput} values - User registration credentials
    */
   const onSubmit = (values: SignupInput) => {
-    mutate(
-      { data: values },
-      {
-        onSuccess: (res) => {
-          handleMutation(res, (_data, message) => {
-            toast.success(message || "Successfully signed up!");
-            router.replace("/login");
-          });
-        },
-        onError: handleError,
-      },
-    );
+    mutate({ data: values });
   };
 
   return (

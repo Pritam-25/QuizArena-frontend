@@ -7,35 +7,30 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { loginSchema, LoginInput } from "@/lib/schemas/auth.schema";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { PasswordInput } from "./passwordInput";
 import { Loader2 } from "lucide-react";
-import { usePostApiV1AuthLogin } from "@/api/auth/auth";
-import { handleMutation } from "@/lib/api/mutationWrapper";
-import { handleError } from "@/lib/api/handleError";
+import { useLogin } from "@/features/auth/hooks/useLogin";
 
 /**
  * LoginForm Component
  *
  * @description
  * - Handles user login using React Hook Form + Zod validation
- * - Uses React Query mutation (Orval generated)
- * - Displays validation + API errors
- * - Redirects user on successful login
- *
- * @returns {JSX.Element}
+ * - Uses custom useLogin hook (React Query mutation)
+ * - Displays validation + API errors (handled by useLogin)
+ * - Redirects user to home page on successful login
  */
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
-
   /**
    * React Hook Form setup with Zod validation
+   * @param {LoginSchema} - Zod schema for login form validation
+   * - Ensures form data adheres to expected structure before submission
+   * - Provides form state management (e.g., errors, isSubmitting)
    */
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -46,9 +41,10 @@ export function LoginForm({
   });
 
   /**
-   * React Query mutation for login
+   * @param {useLogin} - Custom hook for user login (React Query mutation)
+   * - Abstracts API call, success handling (toast + redirect), and error handling
    */
-  const { mutate, isPending } = usePostApiV1AuthLogin();
+  const { mutate, isPending } = useLogin();
 
   /**
    * Handles form submission
@@ -56,18 +52,7 @@ export function LoginForm({
    * @param {LoginInput} values - User login credentials
    */
   const onSubmit = (values: LoginInput) => {
-    mutate(
-      { data: values },
-      {
-        onSuccess: (res) => {
-          handleMutation(res, (_data, message) => {
-            toast.success(message || "Login successful");
-            router.replace("/");
-          });
-        },
-        onError: handleError,
-      }
-    );
+    mutate({ data: values });
   };
 
   return (
