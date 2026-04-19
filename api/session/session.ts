@@ -6,18 +6,24 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useInfiniteQuery,
   useMutation,
-  useQuery
+  useQuery,
+  useQueryClient
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -25,16 +31,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1SessionsSessionId200,
-  GetApiV1SessionsSessionId404,
-  PostApiV1Sessions201,
-  PostApiV1SessionsBody,
-  PostApiV1SessionsJoin201,
-  PostApiV1SessionsJoinBody,
-  PostApiV1SessionsSessionIdStart200
+  GetSessionsSessionId200,
+  GetSessionsSessionId404,
+  PostSessions201,
+  PostSessionsBody,
+  PostSessionsJoin201,
+  PostSessionsJoinBody,
+  PostSessionsSessionIdStart200
 } from '../model';
 
-import { customInstance } from '../../lib/custom-instance';
+import { apiClient } from '../../lib/api/client';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -44,19 +50,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * @summary Create a live session
  */
-export type postApiV1SessionsResponse201 = {
-  data: PostApiV1Sessions201
-  status: 201
-}
-
-export type postApiV1SessionsResponseSuccess = (postApiV1SessionsResponse201) & {
-  headers: Headers;
-};
-;
-
-export type postApiV1SessionsResponse = (postApiV1SessionsResponseSuccess)
-
-export const getPostApiV1SessionsUrl = () => {
+export const getPostSessionsUrl = () => {
 
 
 
@@ -64,26 +58,26 @@ export const getPostApiV1SessionsUrl = () => {
   return `/api/v1/sessions`
 }
 
-export const postApiV1Sessions = async (postApiV1SessionsBody: PostApiV1SessionsBody, options?: RequestInit): Promise<postApiV1SessionsResponse> => {
+export const postSessions = async (postSessionsBody: PostSessionsBody, options?: RequestInit): Promise<PostSessions201> => {
 
-  return customInstance<postApiV1SessionsResponse>(getPostApiV1SessionsUrl(),
+  return apiClient<PostSessions201>(getPostSessionsUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1SessionsBody,)
+      postSessionsBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1SessionsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Sessions>>, TError,{data: PostApiV1SessionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1Sessions>>, TError,{data: PostApiV1SessionsBody}, TContext> => {
+export const getPostSessionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessions>>, TError,{data: PostSessionsBody}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSessions>>, TError,{data: PostSessionsBody}, TContext> => {
 
-const mutationKey = ['postApiV1Sessions'];
+const mutationKey = ['postSessions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -93,10 +87,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1Sessions>>, {data: PostApiV1SessionsBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSessions>>, {data: PostSessionsBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiV1Sessions(data,requestOptions)
+          return  postSessions(data,requestOptions)
         }
 
 
@@ -106,46 +100,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1SessionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1Sessions>>>
-    export type PostApiV1SessionsMutationBody = PostApiV1SessionsBody
-    export type PostApiV1SessionsMutationError = unknown
+    export type PostSessionsMutationResult = NonNullable<Awaited<ReturnType<typeof postSessions>>>
+    export type PostSessionsMutationBody = PostSessionsBody
+    export type PostSessionsMutationError = unknown
 
     /**
  * @summary Create a live session
  */
-export const usePostApiV1Sessions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Sessions>>, TError,{data: PostApiV1SessionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSessions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessions>>, TError,{data: PostSessionsBody}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1Sessions>>,
+        Awaited<ReturnType<typeof postSessions>>,
         TError,
-        {data: PostApiV1SessionsBody},
+        {data: PostSessionsBody},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsMutationOptions(options), queryClient);
+      return useMutation(getPostSessionsMutationOptions(options), queryClient);
     }
     /**
  * @summary Get session by id
  */
-export type getApiV1SessionsSessionIdResponse200 = {
-  data: GetApiV1SessionsSessionId200
-  status: 200
-}
-
-export type getApiV1SessionsSessionIdResponse404 = {
-  data: GetApiV1SessionsSessionId404
-  status: 404
-}
-
-export type getApiV1SessionsSessionIdResponseSuccess = (getApiV1SessionsSessionIdResponse200) & {
-  headers: Headers;
-};
-export type getApiV1SessionsSessionIdResponseError = (getApiV1SessionsSessionIdResponse404) & {
-  headers: Headers;
-};
-
-export type getApiV1SessionsSessionIdResponse = (getApiV1SessionsSessionIdResponseSuccess | getApiV1SessionsSessionIdResponseError)
-
-export const getGetApiV1SessionsSessionIdUrl = (sessionId: string,) => {
+export const getGetSessionsSessionIdUrl = (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -153,9 +128,9 @@ export const getGetApiV1SessionsSessionIdUrl = (sessionId: string,) => {
   return `/api/v1/sessions/${sessionId}`
 }
 
-export const getApiV1SessionsSessionId = async (sessionId: string, options?: RequestInit): Promise<getApiV1SessionsSessionIdResponse> => {
+export const getSessionsSessionId = async (sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<GetSessionsSessionId200> => {
 
-  return customInstance<getApiV1SessionsSessionIdResponse>(getGetApiV1SessionsSessionIdUrl(sessionId),
+  return apiClient<GetSessionsSessionId200>(getGetSessionsSessionIdUrl(sessionId),
   {
     ...options,
     method: 'GET'
@@ -168,69 +143,159 @@ export const getApiV1SessionsSessionId = async (sessionId: string, options?: Req
 
 
 
-export const getGetApiV1SessionsSessionIdQueryKey = (sessionId: string,) => {
+export const getGetSessionsSessionIdInfiniteQueryKey = (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
+    return [
+    'infinite', `/api/v1/sessions/${sessionId}`
+    ] as const;
+    }
+
+export const getGetSessionsSessionIdQueryKey = (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
     return [
     `/api/v1/sessions/${sessionId}`
     ] as const;
     }
 
 
-export const getGetApiV1SessionsSessionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetSessionsSessionIdInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>, TError = GetSessionsSessionId404>(sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SessionsSessionIdQueryKey(sessionId);
+  const queryKey =  queryOptions?.queryKey ?? getGetSessionsSessionIdInfiniteQueryKey(sessionId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>> = ({ signal }) => getApiV1SessionsSessionId(sessionId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSessionsSessionId>>> = ({ signal }) => getSessionsSessionId(sessionId, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(sessionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(sessionId),  staleTime: 60000,  ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiV1SessionsSessionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>>
-export type GetApiV1SessionsSessionIdQueryError = GetApiV1SessionsSessionId404
+export type GetSessionsSessionIdInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getSessionsSessionId>>>
+export type GetSessionsSessionIdInfiniteQueryError = GetSessionsSessionId404
 
 
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>> & Pick<
+export function useGetSessionsSessionIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>, TError = GetSessionsSessionId404>(
+ sessionId: undefined |  string, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>,
+          Awaited<ReturnType<typeof getSessionsSessionId>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>
+          Awaited<ReturnType<typeof getSessionsSessionId>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSessionsSessionIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>, TError = GetSessionsSessionId404>(
+ sessionId?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSessionsSessionId>>,
+          TError,
+          Awaited<ReturnType<typeof getSessionsSessionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSessionsSessionIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>, TError = GetSessionsSessionId404>(
+ sessionId?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get session by id
+ */
+
+export function useGetSessionsSessionIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>, TError = GetSessionsSessionId404>(
+ sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSessionsSessionIdInfiniteQueryOptions(sessionId,options)
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+/**
+ * @summary Get session by id
+ */
+export const useSetGetSessionsSessionIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',updater: InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>> | undefined | ((old: InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>> | undefined) => InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>> | undefined)) => {
+    queryClient.setQueryData(getGetSessionsSessionIdInfiniteQueryKey(sessionId), updater);
+  };
+}
+
+/**
+ * @summary Get session by id
+ */
+export const useGetGetSessionsSessionIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) =>
+    queryClient.getQueryData<InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>>(getGetSessionsSessionIdInfiniteQueryKey(sessionId));
+}
+
+
+export const getGetSessionsSessionIdQueryOptions = <TData = Awaited<ReturnType<typeof getSessionsSessionId>>, TError = GetSessionsSessionId404>(sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSessionsSessionIdQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSessionsSessionId>>> = ({ signal }) => getSessionsSessionId(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(sessionId),  staleTime: 60000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSessionsSessionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getSessionsSessionId>>>
+export type GetSessionsSessionIdQueryError = GetSessionsSessionId404
+
+
+export function useGetSessionsSessionId<TData = Awaited<ReturnType<typeof getSessionsSessionId>>, TError = GetSessionsSessionId404>(
+ sessionId: undefined |  string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSessionsSessionId>>,
+          TError,
+          Awaited<ReturnType<typeof getSessionsSessionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>> & Pick<
+export function useGetSessionsSessionId<TData = Awaited<ReturnType<typeof getSessionsSessionId>>, TError = GetSessionsSessionId404>(
+ sessionId?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>,
+          Awaited<ReturnType<typeof getSessionsSessionId>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1SessionsSessionId>>
+          Awaited<ReturnType<typeof getSessionsSessionId>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSessionsSessionId<TData = Awaited<ReturnType<typeof getSessionsSessionId>>, TError = GetSessionsSessionId404>(
+ sessionId?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get session by id
  */
 
-export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError = GetApiV1SessionsSessionId404>(
- sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetSessionsSessionId<TData = Awaited<ReturnType<typeof getSessionsSessionId>>, TError = GetSessionsSessionId404>(
+ sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSessionsSessionId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiV1SessionsSessionIdQueryOptions(sessionId,options)
+  const queryOptions = getGetSessionsSessionIdQueryOptions(sessionId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -239,25 +304,30 @@ export function useGetApiV1SessionsSessionId<TData = Awaited<ReturnType<typeof g
 
 
 
+/**
+ * @summary Get session by id
+ */
+export const useSetGetSessionsSessionIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',updater: Awaited<ReturnType<typeof getSessionsSessionId>> | undefined | ((old: Awaited<ReturnType<typeof getSessionsSessionId>> | undefined) => Awaited<ReturnType<typeof getSessionsSessionId>> | undefined)) => {
+    queryClient.setQueryData(getGetSessionsSessionIdQueryKey(sessionId), updater);
+  };
+}
 
+/**
+ * @summary Get session by id
+ */
+export const useGetGetSessionsSessionIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getSessionsSessionId>>>(getGetSessionsSessionIdQueryKey(sessionId));
+}
 
 
 /**
  * @summary Join a session by join code
  */
-export type postApiV1SessionsJoinResponse201 = {
-  data: PostApiV1SessionsJoin201
-  status: 201
-}
-
-export type postApiV1SessionsJoinResponseSuccess = (postApiV1SessionsJoinResponse201) & {
-  headers: Headers;
-};
-;
-
-export type postApiV1SessionsJoinResponse = (postApiV1SessionsJoinResponseSuccess)
-
-export const getPostApiV1SessionsJoinUrl = () => {
+export const getPostSessionsJoinUrl = () => {
 
 
 
@@ -265,26 +335,26 @@ export const getPostApiV1SessionsJoinUrl = () => {
   return `/api/v1/sessions/join`
 }
 
-export const postApiV1SessionsJoin = async (postApiV1SessionsJoinBody: PostApiV1SessionsJoinBody, options?: RequestInit): Promise<postApiV1SessionsJoinResponse> => {
+export const postSessionsJoin = async (postSessionsJoinBody: PostSessionsJoinBody, options?: RequestInit): Promise<PostSessionsJoin201> => {
 
-  return customInstance<postApiV1SessionsJoinResponse>(getPostApiV1SessionsJoinUrl(),
+  return apiClient<PostSessionsJoin201>(getPostSessionsJoinUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1SessionsJoinBody,)
+      postSessionsJoinBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1SessionsJoinMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsJoin>>, TError,{data: PostApiV1SessionsJoinBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsJoin>>, TError,{data: PostApiV1SessionsJoinBody}, TContext> => {
+export const getPostSessionsJoinMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessionsJoin>>, TError,{data: PostSessionsJoinBody}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSessionsJoin>>, TError,{data: PostSessionsJoinBody}, TContext> => {
 
-const mutationKey = ['postApiV1SessionsJoin'];
+const mutationKey = ['postSessionsJoin'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -294,10 +364,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SessionsJoin>>, {data: PostApiV1SessionsJoinBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSessionsJoin>>, {data: PostSessionsJoinBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiV1SessionsJoin(data,requestOptions)
+          return  postSessionsJoin(data,requestOptions)
         }
 
 
@@ -307,39 +377,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1SessionsJoinMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SessionsJoin>>>
-    export type PostApiV1SessionsJoinMutationBody = PostApiV1SessionsJoinBody
-    export type PostApiV1SessionsJoinMutationError = unknown
+    export type PostSessionsJoinMutationResult = NonNullable<Awaited<ReturnType<typeof postSessionsJoin>>>
+    export type PostSessionsJoinMutationBody = PostSessionsJoinBody
+    export type PostSessionsJoinMutationError = unknown
 
     /**
  * @summary Join a session by join code
  */
-export const usePostApiV1SessionsJoin = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsJoin>>, TError,{data: PostApiV1SessionsJoinBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSessionsJoin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessionsJoin>>, TError,{data: PostSessionsJoinBody}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1SessionsJoin>>,
+        Awaited<ReturnType<typeof postSessionsJoin>>,
         TError,
-        {data: PostApiV1SessionsJoinBody},
+        {data: PostSessionsJoinBody},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsJoinMutationOptions(options), queryClient);
+      return useMutation(getPostSessionsJoinMutationOptions(options), queryClient);
     }
     /**
  * @summary Start session
  */
-export type postApiV1SessionsSessionIdStartResponse200 = {
-  data: PostApiV1SessionsSessionIdStart200
-  status: 200
-}
-
-export type postApiV1SessionsSessionIdStartResponseSuccess = (postApiV1SessionsSessionIdStartResponse200) & {
-  headers: Headers;
-};
-;
-
-export type postApiV1SessionsSessionIdStartResponse = (postApiV1SessionsSessionIdStartResponseSuccess)
-
-export const getPostApiV1SessionsSessionIdStartUrl = (sessionId: string,) => {
+export const getPostSessionsSessionIdStartUrl = (sessionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -347,9 +405,9 @@ export const getPostApiV1SessionsSessionIdStartUrl = (sessionId: string,) => {
   return `/api/v1/sessions/${sessionId}/start`
 }
 
-export const postApiV1SessionsSessionIdStart = async (sessionId: string, options?: RequestInit): Promise<postApiV1SessionsSessionIdStartResponse> => {
+export const postSessionsSessionIdStart = async (sessionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<PostSessionsSessionIdStart200> => {
 
-  return customInstance<postApiV1SessionsSessionIdStartResponse>(getPostApiV1SessionsSessionIdStartUrl(sessionId),
+  return apiClient<PostSessionsSessionIdStart200>(getPostSessionsSessionIdStartUrl(sessionId),
   {
     ...options,
     method: 'POST'
@@ -361,11 +419,11 @@ export const postApiV1SessionsSessionIdStart = async (sessionId: string, options
 
 
 
-export const getPostApiV1SessionsSessionIdStartMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>, TError,{sessionId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>, TError,{sessionId: string}, TContext> => {
+export const getPostSessionsSessionIdStartMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessionsSessionIdStart>>, TError,{sessionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSessionsSessionIdStart>>, TError,{sessionId?: string}, TContext> => {
 
-const mutationKey = ['postApiV1SessionsSessionIdStart'];
+const mutationKey = ['postSessionsSessionIdStart'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -375,10 +433,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>, {sessionId: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSessionsSessionIdStart>>, {sessionId?: string}> = (props) => {
           const {sessionId} = props ?? {};
 
-          return  postApiV1SessionsSessionIdStart(sessionId,requestOptions)
+          return  postSessionsSessionIdStart(sessionId,requestOptions)
         }
 
 
@@ -388,20 +446,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1SessionsSessionIdStartMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>>
+    export type PostSessionsSessionIdStartMutationResult = NonNullable<Awaited<ReturnType<typeof postSessionsSessionIdStart>>>
 
-    export type PostApiV1SessionsSessionIdStartMutationError = unknown
+    export type PostSessionsSessionIdStartMutationError = unknown
 
     /**
  * @summary Start session
  */
-export const usePostApiV1SessionsSessionIdStart = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>, TError,{sessionId: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostSessionsSessionIdStart = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSessionsSessionIdStart>>, TError,{sessionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1SessionsSessionIdStart>>,
+        Awaited<ReturnType<typeof postSessionsSessionIdStart>>,
         TError,
-        {sessionId: string},
+        {sessionId?: string},
         TContext
       > => {
-      return useMutation(getPostApiV1SessionsSessionIdStartMutationOptions(options), queryClient);
+      return useMutation(getPostSessionsSessionIdStartMutationOptions(options), queryClient);
     }

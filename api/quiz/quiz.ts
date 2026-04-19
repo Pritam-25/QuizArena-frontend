@@ -6,18 +6,24 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useInfiniteQuery,
   useMutation,
-  useQuery
+  useQuery,
+  useQueryClient
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -25,22 +31,22 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1Quizzes200,
-  GetApiV1QuizzesId200,
-  GetApiV1QuizzesId404,
-  PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorder200,
-  PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody,
-  PostApiV1Quizzes201,
-  PostApiV1Quizzes401,
-  PostApiV1QuizzesBody,
-  PostApiV1QuizzesQuestionsQuestionIdOptions201,
-  PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem,
-  PostApiV1QuizzesQuizIdQuestions201,
-  PostApiV1QuizzesQuizIdQuestions401,
-  PostApiV1QuizzesQuizIdQuestionsBody
+  GetQuizzes200,
+  GetQuizzesId200,
+  GetQuizzesId404,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder200,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorderBody,
+  PostQuizzes201,
+  PostQuizzes401,
+  PostQuizzesBody,
+  PostQuizzesQuestionsQuestionIdOptions201,
+  PostQuizzesQuestionsQuestionIdOptionsBodyItem,
+  PostQuizzesQuizIdQuestions201,
+  PostQuizzesQuizIdQuestions401,
+  PostQuizzesQuizIdQuestionsBody
 } from '../model';
 
-import { customInstance } from '../../lib/custom-instance';
+import { apiClient } from '../../lib/api/client';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -50,26 +56,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * @summary Create a quiz
  */
-export type postApiV1QuizzesResponse201 = {
-  data: PostApiV1Quizzes201
-  status: 201
-}
-
-export type postApiV1QuizzesResponse401 = {
-  data: PostApiV1Quizzes401
-  status: 401
-}
-
-export type postApiV1QuizzesResponseSuccess = (postApiV1QuizzesResponse201) & {
-  headers: Headers;
-};
-export type postApiV1QuizzesResponseError = (postApiV1QuizzesResponse401) & {
-  headers: Headers;
-};
-
-export type postApiV1QuizzesResponse = (postApiV1QuizzesResponseSuccess | postApiV1QuizzesResponseError)
-
-export const getPostApiV1QuizzesUrl = () => {
+export const getPostQuizzesUrl = () => {
 
 
 
@@ -77,26 +64,26 @@ export const getPostApiV1QuizzesUrl = () => {
   return `/api/v1/quizzes`
 }
 
-export const postApiV1Quizzes = async (postApiV1QuizzesBody: PostApiV1QuizzesBody, options?: RequestInit): Promise<postApiV1QuizzesResponse> => {
+export const postQuizzes = async (postQuizzesBody: PostQuizzesBody, options?: RequestInit): Promise<PostQuizzes201> => {
 
-  return customInstance<postApiV1QuizzesResponse>(getPostApiV1QuizzesUrl(),
+  return apiClient<PostQuizzes201>(getPostQuizzesUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1QuizzesBody,)
+      postQuizzesBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1QuizzesMutationOptions = <TError = PostApiV1Quizzes401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Quizzes>>, TError,{data: PostApiV1QuizzesBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1Quizzes>>, TError,{data: PostApiV1QuizzesBody}, TContext> => {
+export const getPostQuizzesMutationOptions = <TError = PostQuizzes401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzes>>, TError,{data: PostQuizzesBody}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postQuizzes>>, TError,{data: PostQuizzesBody}, TContext> => {
 
-const mutationKey = ['postApiV1Quizzes'];
+const mutationKey = ['postQuizzes'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -106,10 +93,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1Quizzes>>, {data: PostApiV1QuizzesBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postQuizzes>>, {data: PostQuizzesBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiV1Quizzes(data,requestOptions)
+          return  postQuizzes(data,requestOptions)
         }
 
 
@@ -119,39 +106,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1QuizzesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1Quizzes>>>
-    export type PostApiV1QuizzesMutationBody = PostApiV1QuizzesBody
-    export type PostApiV1QuizzesMutationError = PostApiV1Quizzes401
+    export type PostQuizzesMutationResult = NonNullable<Awaited<ReturnType<typeof postQuizzes>>>
+    export type PostQuizzesMutationBody = PostQuizzesBody
+    export type PostQuizzesMutationError = PostQuizzes401
 
     /**
  * @summary Create a quiz
  */
-export const usePostApiV1Quizzes = <TError = PostApiV1Quizzes401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1Quizzes>>, TError,{data: PostApiV1QuizzesBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostQuizzes = <TError = PostQuizzes401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzes>>, TError,{data: PostQuizzesBody}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1Quizzes>>,
+        Awaited<ReturnType<typeof postQuizzes>>,
         TError,
-        {data: PostApiV1QuizzesBody},
+        {data: PostQuizzesBody},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesMutationOptions(options), queryClient);
+      return useMutation(getPostQuizzesMutationOptions(options), queryClient);
     }
     /**
  * @summary Get all quizzes
  */
-export type getApiV1QuizzesResponse200 = {
-  data: GetApiV1Quizzes200
-  status: 200
-}
-
-export type getApiV1QuizzesResponseSuccess = (getApiV1QuizzesResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getApiV1QuizzesResponse = (getApiV1QuizzesResponseSuccess)
-
-export const getGetApiV1QuizzesUrl = () => {
+export const getGetQuizzesUrl = () => {
 
 
 
@@ -159,9 +134,9 @@ export const getGetApiV1QuizzesUrl = () => {
   return `/api/v1/quizzes`
 }
 
-export const getApiV1Quizzes = async ( options?: RequestInit): Promise<getApiV1QuizzesResponse> => {
+export const getQuizzes = async ( options?: RequestInit): Promise<GetQuizzes200> => {
 
-  return customInstance<getApiV1QuizzesResponse>(getGetApiV1QuizzesUrl(),
+  return apiClient<GetQuizzes200>(getGetQuizzesUrl(),
   {
     ...options,
     method: 'GET'
@@ -174,69 +149,159 @@ export const getApiV1Quizzes = async ( options?: RequestInit): Promise<getApiV1Q
 
 
 
-export const getGetApiV1QuizzesQueryKey = () => {
+export const getGetQuizzesInfiniteQueryKey = () => {
+    return [
+    'infinite', `/api/v1/quizzes`
+    ] as const;
+    }
+
+export const getGetQuizzesQueryKey = () => {
     return [
     `/api/v1/quizzes`
     ] as const;
     }
 
 
-export const getGetApiV1QuizzesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetQuizzesInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>, TError = unknown>( options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiV1QuizzesQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetQuizzesInfiniteQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Quizzes>>> = ({ signal }) => getApiV1Quizzes({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuizzes>>> = ({ signal }) => getQuizzes({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn,   staleTime: 60000,  ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiV1QuizzesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Quizzes>>>
-export type GetApiV1QuizzesQueryError = unknown
+export type GetQuizzesInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getQuizzes>>>
+export type GetQuizzesInfiniteQueryError = unknown
 
 
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>> & Pick<
+export function useGetQuizzesInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>, TError = unknown>(
+  options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1Quizzes>>,
+          Awaited<ReturnType<typeof getQuizzes>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1Quizzes>>
+          Awaited<ReturnType<typeof getQuizzes>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetQuizzesInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>, TError = unknown>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzes>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetQuizzesInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>, TError = unknown>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get all quizzes
+ */
+
+export function useGetQuizzesInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>, TError = unknown>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetQuizzesInfiniteQueryOptions(options)
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+/**
+ * @summary Get all quizzes
+ */
+export const useSetGetQuizzesInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (updater: InfiniteData<Awaited<ReturnType<typeof getQuizzes>>> | undefined | ((old: InfiniteData<Awaited<ReturnType<typeof getQuizzes>>> | undefined) => InfiniteData<Awaited<ReturnType<typeof getQuizzes>>> | undefined)) => {
+    queryClient.setQueryData(getGetQuizzesInfiniteQueryKey(), updater);
+  };
+}
+
+/**
+ * @summary Get all quizzes
+ */
+export const useGetGetQuizzesInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.getQueryData<InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>>(getGetQuizzesInfiniteQueryKey());
+}
+
+
+export const getGetQuizzesQueryOptions = <TData = Awaited<ReturnType<typeof getQuizzes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetQuizzesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuizzes>>> = ({ signal }) => getQuizzes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn,   staleTime: 60000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetQuizzesQueryResult = NonNullable<Awaited<ReturnType<typeof getQuizzes>>>
+export type GetQuizzesQueryError = unknown
+
+
+export function useGetQuizzes<TData = Awaited<ReturnType<typeof getQuizzes>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzes>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>> & Pick<
+export function useGetQuizzes<TData = Awaited<ReturnType<typeof getQuizzes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1Quizzes>>,
+          Awaited<ReturnType<typeof getQuizzes>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1Quizzes>>
+          Awaited<ReturnType<typeof getQuizzes>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetQuizzes<TData = Awaited<ReturnType<typeof getQuizzes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all quizzes
  */
 
-export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Quizzes>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Quizzes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetQuizzes<TData = Awaited<ReturnType<typeof getQuizzes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiV1QuizzesQueryOptions(options)
+  const queryOptions = getGetQuizzesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -245,32 +310,30 @@ export function useGetApiV1Quizzes<TData = Awaited<ReturnType<typeof getApiV1Qui
 
 
 
+/**
+ * @summary Get all quizzes
+ */
+export const useSetGetQuizzesQueryData = () => {
+  const queryClient = useQueryClient();
+  return (updater: Awaited<ReturnType<typeof getQuizzes>> | undefined | ((old: Awaited<ReturnType<typeof getQuizzes>> | undefined) => Awaited<ReturnType<typeof getQuizzes>> | undefined)) => {
+    queryClient.setQueryData(getGetQuizzesQueryKey(), updater);
+  };
+}
 
+/**
+ * @summary Get all quizzes
+ */
+export const useGetGetQuizzesQueryData = () => {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getQuizzes>>>(getGetQuizzesQueryKey());
+}
 
 
 /**
  * @summary Get quiz by id
  */
-export type getApiV1QuizzesIdResponse200 = {
-  data: GetApiV1QuizzesId200
-  status: 200
-}
-
-export type getApiV1QuizzesIdResponse404 = {
-  data: GetApiV1QuizzesId404
-  status: 404
-}
-
-export type getApiV1QuizzesIdResponseSuccess = (getApiV1QuizzesIdResponse200) & {
-  headers: Headers;
-};
-export type getApiV1QuizzesIdResponseError = (getApiV1QuizzesIdResponse404) & {
-  headers: Headers;
-};
-
-export type getApiV1QuizzesIdResponse = (getApiV1QuizzesIdResponseSuccess | getApiV1QuizzesIdResponseError)
-
-export const getGetApiV1QuizzesIdUrl = (id: string,) => {
+export const getGetQuizzesIdUrl = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -278,9 +341,9 @@ export const getGetApiV1QuizzesIdUrl = (id: string,) => {
   return `/api/v1/quizzes/${id}`
 }
 
-export const getApiV1QuizzesId = async (id: string, options?: RequestInit): Promise<getApiV1QuizzesIdResponse> => {
+export const getQuizzesId = async (id: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<GetQuizzesId200> => {
 
-  return customInstance<getApiV1QuizzesIdResponse>(getGetApiV1QuizzesIdUrl(id),
+  return apiClient<GetQuizzesId200>(getGetQuizzesIdUrl(id),
   {
     ...options,
     method: 'GET'
@@ -293,69 +356,159 @@ export const getApiV1QuizzesId = async (id: string, options?: RequestInit): Prom
 
 
 
-export const getGetApiV1QuizzesIdQueryKey = (id: string,) => {
+export const getGetQuizzesIdInfiniteQueryKey = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
+    return [
+    'infinite', `/api/v1/quizzes/${id}`
+    ] as const;
+    }
+
+export const getGetQuizzesIdQueryKey = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
     return [
     `/api/v1/quizzes/${id}`
     ] as const;
     }
 
 
-export const getGetApiV1QuizzesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetQuizzesIdInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>, TError = GetQuizzesId404>(id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiV1QuizzesIdQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetQuizzesIdInfiniteQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1QuizzesId>>> = ({ signal }) => getApiV1QuizzesId(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuizzesId>>> = ({ signal }) => getQuizzesId(id, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(id),  staleTime: 60000,  ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiV1QuizzesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1QuizzesId>>>
-export type GetApiV1QuizzesIdQueryError = GetApiV1QuizzesId404
+export type GetQuizzesIdInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getQuizzesId>>>
+export type GetQuizzesIdInfiniteQueryError = GetQuizzesId404
 
 
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>> & Pick<
+export function useGetQuizzesIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>, TError = GetQuizzesId404>(
+ id: undefined |  string, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>,
+          Awaited<ReturnType<typeof getQuizzesId>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>
+          Awaited<ReturnType<typeof getQuizzesId>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetQuizzesIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>, TError = GetQuizzesId404>(
+ id?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetQuizzesIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>, TError = GetQuizzesId404>(
+ id?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get quiz by id
+ */
+
+export function useGetQuizzesIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>, TError = GetQuizzesId404>(
+ id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetQuizzesIdInfiniteQueryOptions(id,options)
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+/**
+ * @summary Get quiz by id
+ */
+export const useSetGetQuizzesIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000',updater: InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>> | undefined | ((old: InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>> | undefined) => InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>> | undefined)) => {
+    queryClient.setQueryData(getGetQuizzesIdInfiniteQueryKey(id), updater);
+  };
+}
+
+/**
+ * @summary Get quiz by id
+ */
+export const useGetGetQuizzesIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000',) =>
+    queryClient.getQueryData<InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>>(getGetQuizzesIdInfiniteQueryKey(id));
+}
+
+
+export const getGetQuizzesIdQueryOptions = <TData = Awaited<ReturnType<typeof getQuizzesId>>, TError = GetQuizzesId404>(id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetQuizzesIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuizzesId>>> = ({ signal }) => getQuizzesId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id),  staleTime: 60000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetQuizzesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getQuizzesId>>>
+export type GetQuizzesIdQueryError = GetQuizzesId404
+
+
+export function useGetQuizzesId<TData = Awaited<ReturnType<typeof getQuizzesId>>, TError = GetQuizzesId404>(
+ id: undefined |  string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>> & Pick<
+export function useGetQuizzesId<TData = Awaited<ReturnType<typeof getQuizzesId>>, TError = GetQuizzesId404>(
+ id?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>,
+          Awaited<ReturnType<typeof getQuizzesId>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1QuizzesId>>
+          Awaited<ReturnType<typeof getQuizzesId>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetQuizzesId<TData = Awaited<ReturnType<typeof getQuizzesId>>, TError = GetQuizzesId404>(
+ id?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get quiz by id
  */
 
-export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError = GetApiV1QuizzesId404>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1QuizzesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetQuizzesId<TData = Awaited<ReturnType<typeof getQuizzesId>>, TError = GetQuizzesId404>(
+ id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getQuizzesId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiV1QuizzesIdQueryOptions(id,options)
+  const queryOptions = getGetQuizzesIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -364,32 +517,30 @@ export function useGetApiV1QuizzesId<TData = Awaited<ReturnType<typeof getApiV1Q
 
 
 
+/**
+ * @summary Get quiz by id
+ */
+export const useSetGetQuizzesIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000',updater: Awaited<ReturnType<typeof getQuizzesId>> | undefined | ((old: Awaited<ReturnType<typeof getQuizzesId>> | undefined) => Awaited<ReturnType<typeof getQuizzesId>> | undefined)) => {
+    queryClient.setQueryData(getGetQuizzesIdQueryKey(id), updater);
+  };
+}
 
+/**
+ * @summary Get quiz by id
+ */
+export const useGetGetQuizzesIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000',) =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getQuizzesId>>>(getGetQuizzesIdQueryKey(id));
+}
 
 
 /**
  * @summary Add question to quiz
  */
-export type postApiV1QuizzesQuizIdQuestionsResponse201 = {
-  data: PostApiV1QuizzesQuizIdQuestions201
-  status: 201
-}
-
-export type postApiV1QuizzesQuizIdQuestionsResponse401 = {
-  data: PostApiV1QuizzesQuizIdQuestions401
-  status: 401
-}
-
-export type postApiV1QuizzesQuizIdQuestionsResponseSuccess = (postApiV1QuizzesQuizIdQuestionsResponse201) & {
-  headers: Headers;
-};
-export type postApiV1QuizzesQuizIdQuestionsResponseError = (postApiV1QuizzesQuizIdQuestionsResponse401) & {
-  headers: Headers;
-};
-
-export type postApiV1QuizzesQuizIdQuestionsResponse = (postApiV1QuizzesQuizIdQuestionsResponseSuccess | postApiV1QuizzesQuizIdQuestionsResponseError)
-
-export const getPostApiV1QuizzesQuizIdQuestionsUrl = (quizId: string,) => {
+export const getPostQuizzesQuizIdQuestionsUrl = (quizId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -397,27 +548,27 @@ export const getPostApiV1QuizzesQuizIdQuestionsUrl = (quizId: string,) => {
   return `/api/v1/quizzes/${quizId}/questions`
 }
 
-export const postApiV1QuizzesQuizIdQuestions = async (quizId: string,
-    postApiV1QuizzesQuizIdQuestionsBody: PostApiV1QuizzesQuizIdQuestionsBody, options?: RequestInit): Promise<postApiV1QuizzesQuizIdQuestionsResponse> => {
+export const postQuizzesQuizIdQuestions = async (postQuizzesQuizIdQuestionsBody: PostQuizzesQuizIdQuestionsBody,
+    quizId: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<PostQuizzesQuizIdQuestions201> => {
 
-  return customInstance<postApiV1QuizzesQuizIdQuestionsResponse>(getPostApiV1QuizzesQuizIdQuestionsUrl(quizId),
+  return apiClient<PostQuizzesQuizIdQuestions201>(getPostQuizzesQuizIdQuestionsUrl(quizId),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1QuizzesQuizIdQuestionsBody,)
+      postQuizzesQuizIdQuestionsBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1QuizzesQuizIdQuestionsMutationOptions = <TError = PostApiV1QuizzesQuizIdQuestions401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>, TError,{quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>, TError,{quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody}, TContext> => {
+export const getPostQuizzesQuizIdQuestionsMutationOptions = <TError = PostQuizzesQuizIdQuestions401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>, TError,{data: PostQuizzesQuizIdQuestionsBody;quizId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>, TError,{data: PostQuizzesQuizIdQuestionsBody;quizId?: string}, TContext> => {
 
-const mutationKey = ['postApiV1QuizzesQuizIdQuestions'];
+const mutationKey = ['postQuizzesQuizIdQuestions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -427,10 +578,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>, {quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody}> = (props) => {
-          const {quizId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>, {data: PostQuizzesQuizIdQuestionsBody;quizId?: string}> = (props) => {
+          const {data,quizId} = props ?? {};
 
-          return  postApiV1QuizzesQuizIdQuestions(quizId,data,requestOptions)
+          return  postQuizzesQuizIdQuestions(data,quizId,requestOptions)
         }
 
 
@@ -440,39 +591,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1QuizzesQuizIdQuestionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>>
-    export type PostApiV1QuizzesQuizIdQuestionsMutationBody = PostApiV1QuizzesQuizIdQuestionsBody
-    export type PostApiV1QuizzesQuizIdQuestionsMutationError = PostApiV1QuizzesQuizIdQuestions401
+    export type PostQuizzesQuizIdQuestionsMutationResult = NonNullable<Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>>
+    export type PostQuizzesQuizIdQuestionsMutationBody = PostQuizzesQuizIdQuestionsBody
+    export type PostQuizzesQuizIdQuestionsMutationError = PostQuizzesQuizIdQuestions401
 
     /**
  * @summary Add question to quiz
  */
-export const usePostApiV1QuizzesQuizIdQuestions = <TError = PostApiV1QuizzesQuizIdQuestions401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>, TError,{quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostQuizzesQuizIdQuestions = <TError = PostQuizzesQuizIdQuestions401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>, TError,{data: PostQuizzesQuizIdQuestionsBody;quizId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1QuizzesQuizIdQuestions>>,
+        Awaited<ReturnType<typeof postQuizzesQuizIdQuestions>>,
         TError,
-        {quizId: string;data: PostApiV1QuizzesQuizIdQuestionsBody},
+        {data: PostQuizzesQuizIdQuestionsBody;quizId?: string},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesQuizIdQuestionsMutationOptions(options), queryClient);
+      return useMutation(getPostQuizzesQuizIdQuestionsMutationOptions(options), queryClient);
     }
     /**
  * @summary Add options to question
  */
-export type postApiV1QuizzesQuestionsQuestionIdOptionsResponse201 = {
-  data: PostApiV1QuizzesQuestionsQuestionIdOptions201
-  status: 201
-}
-
-export type postApiV1QuizzesQuestionsQuestionIdOptionsResponseSuccess = (postApiV1QuizzesQuestionsQuestionIdOptionsResponse201) & {
-  headers: Headers;
-};
-;
-
-export type postApiV1QuizzesQuestionsQuestionIdOptionsResponse = (postApiV1QuizzesQuestionsQuestionIdOptionsResponseSuccess)
-
-export const getPostApiV1QuizzesQuestionsQuestionIdOptionsUrl = (questionId: string,) => {
+export const getPostQuizzesQuestionsQuestionIdOptionsUrl = (questionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -480,27 +619,27 @@ export const getPostApiV1QuizzesQuestionsQuestionIdOptionsUrl = (questionId: str
   return `/api/v1/quizzes/questions/${questionId}/options`
 }
 
-export const postApiV1QuizzesQuestionsQuestionIdOptions = async (questionId: string,
-    postApiV1QuizzesQuestionsQuestionIdOptionsBodyItem: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[], options?: RequestInit): Promise<postApiV1QuizzesQuestionsQuestionIdOptionsResponse> => {
+export const postQuizzesQuestionsQuestionIdOptions = async (postQuizzesQuestionsQuestionIdOptionsBodyItem: PostQuizzesQuestionsQuestionIdOptionsBodyItem[],
+    questionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<PostQuizzesQuestionsQuestionIdOptions201> => {
 
-  return customInstance<postApiV1QuizzesQuestionsQuestionIdOptionsResponse>(getPostApiV1QuizzesQuestionsQuestionIdOptionsUrl(questionId),
+  return apiClient<PostQuizzesQuestionsQuestionIdOptions201>(getPostQuizzesQuestionsQuestionIdOptionsUrl(questionId),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1QuizzesQuestionsQuestionIdOptionsBodyItem,)
+      postQuizzesQuestionsQuestionIdOptionsBodyItem,)
   }
 );}
 
 
 
 
-export const getPostApiV1QuizzesQuestionsQuestionIdOptionsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>, TError,{questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>, TError,{questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]}, TContext> => {
+export const getPostQuizzesQuestionsQuestionIdOptionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>, TError,{data: PostQuizzesQuestionsQuestionIdOptionsBodyItem[];questionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>, TError,{data: PostQuizzesQuestionsQuestionIdOptionsBodyItem[];questionId?: string}, TContext> => {
 
-const mutationKey = ['postApiV1QuizzesQuestionsQuestionIdOptions'];
+const mutationKey = ['postQuizzesQuestionsQuestionIdOptions'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -510,10 +649,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>, {questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]}> = (props) => {
-          const {questionId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>, {data: PostQuizzesQuestionsQuestionIdOptionsBodyItem[];questionId?: string}> = (props) => {
+          const {data,questionId} = props ?? {};
 
-          return  postApiV1QuizzesQuestionsQuestionIdOptions(questionId,data,requestOptions)
+          return  postQuizzesQuestionsQuestionIdOptions(data,questionId,requestOptions)
         }
 
 
@@ -523,40 +662,28 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1QuizzesQuestionsQuestionIdOptionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>>
-    export type PostApiV1QuizzesQuestionsQuestionIdOptionsMutationBody = PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]
-    export type PostApiV1QuizzesQuestionsQuestionIdOptionsMutationError = unknown
+    export type PostQuizzesQuestionsQuestionIdOptionsMutationResult = NonNullable<Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>>
+    export type PostQuizzesQuestionsQuestionIdOptionsMutationBody = PostQuizzesQuestionsQuestionIdOptionsBodyItem[]
+    export type PostQuizzesQuestionsQuestionIdOptionsMutationError = unknown
 
     /**
  * @summary Add options to question
  */
-export const usePostApiV1QuizzesQuestionsQuestionIdOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>, TError,{questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostQuizzesQuestionsQuestionIdOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>, TError,{data: PostQuizzesQuestionsQuestionIdOptionsBodyItem[];questionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1QuizzesQuestionsQuestionIdOptions>>,
+        Awaited<ReturnType<typeof postQuizzesQuestionsQuestionIdOptions>>,
         TError,
-        {questionId: string;data: PostApiV1QuizzesQuestionsQuestionIdOptionsBodyItem[]},
+        {data: PostQuizzesQuestionsQuestionIdOptionsBodyItem[];questionId?: string},
         TContext
       > => {
-      return useMutation(getPostApiV1QuizzesQuestionsQuestionIdOptionsMutationOptions(options), queryClient);
+      return useMutation(getPostQuizzesQuestionsQuestionIdOptionsMutationOptions(options), queryClient);
     }
     /**
  * @summary Reorder a question inside a quiz
  */
-export type patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponse200 = {
-  data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorder200
-  status: 200
-}
-
-export type patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponseSuccess = (patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponse200) & {
-  headers: Headers;
-};
-;
-
-export type patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponse = (patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponseSuccess)
-
-export const getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderUrl = (quizId: string,
-    questionId: string,) => {
+export const getPatchQuizzesQuizIdQuestionsQuestionIdReorderUrl = (quizId: string = '123e4567-e89b-12d3-a456-426614174000',
+    questionId: string = '123e4567-e89b-12d3-a456-426614174000',) => {
 
 
 
@@ -564,28 +691,28 @@ export const getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderUrl = (quizId: 
   return `/api/v1/quizzes/${quizId}/questions/${questionId}/reorder`
 }
 
-export const patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder = async (quizId: string,
-    questionId: string,
-    patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody, options?: RequestInit): Promise<patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponse> => {
+export const patchQuizzesQuizIdQuestionsQuestionIdReorder = async (patchQuizzesQuizIdQuestionsQuestionIdReorderBody: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody,
+    quizId: string = '123e4567-e89b-12d3-a456-426614174000',
+    questionId: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<PatchQuizzesQuizIdQuestionsQuestionIdReorder200> => {
 
-  return customInstance<patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderResponse>(getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderUrl(quizId,questionId),
+  return apiClient<PatchQuizzesQuizIdQuestionsQuestionIdReorder200>(getPatchQuizzesQuizIdQuestionsQuestionIdReorderUrl(quizId,questionId),
   {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      patchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody,)
+      patchQuizzesQuizIdQuestionsQuestionIdReorderBody,)
   }
 );}
 
 
 
 
-export const getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody}, TContext> => {
+export const getPatchQuizzesQuizIdQuestionsQuestionIdReorderMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{data: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;quizId?: string;questionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{data: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;quizId?: string;questionId?: string}, TContext> => {
 
-const mutationKey = ['patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder'];
+const mutationKey = ['patchQuizzesQuizIdQuestionsQuestionIdReorder'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -595,10 +722,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>, {quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody}> = (props) => {
-          const {quizId,questionId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>, {data: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;quizId?: string;questionId?: string}> = (props) => {
+          const {data,quizId,questionId} = props ?? {};
 
-          return  patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder(quizId,questionId,data,requestOptions)
+          return  patchQuizzesQuizIdQuestionsQuestionIdReorder(data,quizId,questionId,requestOptions)
         }
 
 
@@ -608,20 +735,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>>
-    export type PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationBody = PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody
-    export type PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationError = unknown
+    export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationResult = NonNullable<Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>>
+    export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationBody = PatchQuizzesQuizIdQuestionsQuestionIdReorderBody
+    export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationError = unknown
 
     /**
  * @summary Reorder a question inside a quiz
  */
-export const usePatchApiV1QuizzesQuizIdQuestionsQuestionIdReorder = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePatchQuizzesQuizIdQuestionsQuestionIdReorder = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>, TError,{data: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;quizId?: string;questionId?: string}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof patchApiV1QuizzesQuizIdQuestionsQuestionIdReorder>>,
+        Awaited<ReturnType<typeof patchQuizzesQuizIdQuestionsQuestionIdReorder>>,
         TError,
-        {quizId: string;questionId: string;data: PatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderBody},
+        {data: PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;quizId?: string;questionId?: string},
         TContext
       > => {
-      return useMutation(getPatchApiV1QuizzesQuizIdQuestionsQuestionIdReorderMutationOptions(options), queryClient);
+      return useMutation(getPatchQuizzesQuizIdQuestionsQuestionIdReorderMutationOptions(options), queryClient);
     }

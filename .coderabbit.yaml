@@ -1,0 +1,15 @@
+reviews:
+  path_filters:
+    #  skip these folders completely
+    - '!api/**'
+    - '!components/**'
+
+    #  always ignore generated/noise
+    - '!**/node_modules/**'
+    - '!**/dist/**'
+    - '!**/build/**'
+    - '!**/*.generated.*'
+    - '!**/generated/**'
+    - '!**/orval/**'
+    - '!**/openapi/**'
+    - '!**/*.lock'
