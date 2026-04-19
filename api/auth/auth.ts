@@ -6,18 +6,24 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useInfiniteQuery,
   useMutation,
-  useQuery
+  useQuery,
+  useQueryClient
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -25,17 +31,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetApiV1AuthMe200,
-  GetApiV1AuthMe401,
-  PostApiV1AuthLogin200,
-  PostApiV1AuthLogin401,
-  PostApiV1AuthLoginBody,
-  PostApiV1AuthRegister201,
-  PostApiV1AuthRegister409,
-  PostApiV1AuthRegisterBody
+  GetAuthMe200,
+  GetAuthMe401,
+  PostAuthLogin200,
+  PostAuthLogin401,
+  PostAuthLoginBody,
+  PostAuthRegister201,
+  PostAuthRegister409,
+  PostAuthRegisterBody
 } from '../model';
 
-import { customInstance } from '../../lib/custom-instance';
+import { apiClient } from '../../lib/api/client';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -45,26 +51,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * @summary Register a new user
  */
-export type postApiV1AuthRegisterResponse201 = {
-  data: PostApiV1AuthRegister201
-  status: 201
-}
-
-export type postApiV1AuthRegisterResponse409 = {
-  data: PostApiV1AuthRegister409
-  status: 409
-}
-
-export type postApiV1AuthRegisterResponseSuccess = (postApiV1AuthRegisterResponse201) & {
-  headers: Headers;
-};
-export type postApiV1AuthRegisterResponseError = (postApiV1AuthRegisterResponse409) & {
-  headers: Headers;
-};
-
-export type postApiV1AuthRegisterResponse = (postApiV1AuthRegisterResponseSuccess | postApiV1AuthRegisterResponseError)
-
-export const getPostApiV1AuthRegisterUrl = () => {
+export const getPostAuthRegisterUrl = () => {
 
 
 
@@ -72,26 +59,26 @@ export const getPostApiV1AuthRegisterUrl = () => {
   return `/api/v1/auth/register`
 }
 
-export const postApiV1AuthRegister = async (postApiV1AuthRegisterBody: PostApiV1AuthRegisterBody, options?: RequestInit): Promise<postApiV1AuthRegisterResponse> => {
+export const postAuthRegister = async (postAuthRegisterBody: PostAuthRegisterBody, options?: RequestInit): Promise<PostAuthRegister201> => {
 
-  return customInstance<postApiV1AuthRegisterResponse>(getPostApiV1AuthRegisterUrl(),
+  return apiClient<PostAuthRegister201>(getPostAuthRegisterUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1AuthRegisterBody,)
+      postAuthRegisterBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1AuthRegisterMutationOptions = <TError = PostApiV1AuthRegister409,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthRegister>>, TError,{data: PostApiV1AuthRegisterBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthRegister>>, TError,{data: PostApiV1AuthRegisterBody}, TContext> => {
+export const getPostAuthRegisterMutationOptions = <TError = PostAuthRegister409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRegister>>, TError,{data: PostAuthRegisterBody}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthRegister>>, TError,{data: PostAuthRegisterBody}, TContext> => {
 
-const mutationKey = ['postApiV1AuthRegister'];
+const mutationKey = ['postAuthRegister'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -101,10 +88,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AuthRegister>>, {data: PostApiV1AuthRegisterBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthRegister>>, {data: PostAuthRegisterBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiV1AuthRegister(data,requestOptions)
+          return  postAuthRegister(data,requestOptions)
         }
 
 
@@ -114,46 +101,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1AuthRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AuthRegister>>>
-    export type PostApiV1AuthRegisterMutationBody = PostApiV1AuthRegisterBody
-    export type PostApiV1AuthRegisterMutationError = PostApiV1AuthRegister409
+    export type PostAuthRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthRegister>>>
+    export type PostAuthRegisterMutationBody = PostAuthRegisterBody
+    export type PostAuthRegisterMutationError = PostAuthRegister409
 
     /**
  * @summary Register a new user
  */
-export const usePostApiV1AuthRegister = <TError = PostApiV1AuthRegister409,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthRegister>>, TError,{data: PostApiV1AuthRegisterBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthRegister = <TError = PostAuthRegister409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRegister>>, TError,{data: PostAuthRegisterBody}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+        Awaited<ReturnType<typeof postAuthRegister>>,
         TError,
-        {data: PostApiV1AuthRegisterBody},
+        {data: PostAuthRegisterBody},
         TContext
       > => {
-      return useMutation(getPostApiV1AuthRegisterMutationOptions(options), queryClient);
+      return useMutation(getPostAuthRegisterMutationOptions(options), queryClient);
     }
     /**
  * @summary Authenticate a user
  */
-export type postApiV1AuthLoginResponse200 = {
-  data: PostApiV1AuthLogin200
-  status: 200
-}
-
-export type postApiV1AuthLoginResponse401 = {
-  data: PostApiV1AuthLogin401
-  status: 401
-}
-
-export type postApiV1AuthLoginResponseSuccess = (postApiV1AuthLoginResponse200) & {
-  headers: Headers;
-};
-export type postApiV1AuthLoginResponseError = (postApiV1AuthLoginResponse401) & {
-  headers: Headers;
-};
-
-export type postApiV1AuthLoginResponse = (postApiV1AuthLoginResponseSuccess | postApiV1AuthLoginResponseError)
-
-export const getPostApiV1AuthLoginUrl = () => {
+export const getPostAuthLoginUrl = () => {
 
 
 
@@ -161,26 +129,26 @@ export const getPostApiV1AuthLoginUrl = () => {
   return `/api/v1/auth/login`
 }
 
-export const postApiV1AuthLogin = async (postApiV1AuthLoginBody: PostApiV1AuthLoginBody, options?: RequestInit): Promise<postApiV1AuthLoginResponse> => {
+export const postAuthLogin = async (postAuthLoginBody: PostAuthLoginBody, options?: RequestInit): Promise<PostAuthLogin200> => {
 
-  return customInstance<postApiV1AuthLoginResponse>(getPostApiV1AuthLoginUrl(),
+  return apiClient<PostAuthLogin200>(getPostAuthLoginUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      postApiV1AuthLoginBody,)
+      postAuthLoginBody,)
   }
 );}
 
 
 
 
-export const getPostApiV1AuthLoginMutationOptions = <TError = PostApiV1AuthLogin401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthLogin>>, TError,{data: PostApiV1AuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthLogin>>, TError,{data: PostApiV1AuthLoginBody}, TContext> => {
+export const getPostAuthLoginMutationOptions = <TError = PostAuthLogin401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogin>>, TError,{data: PostAuthLoginBody}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthLogin>>, TError,{data: PostAuthLoginBody}, TContext> => {
 
-const mutationKey = ['postApiV1AuthLogin'];
+const mutationKey = ['postAuthLogin'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -190,10 +158,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AuthLogin>>, {data: PostApiV1AuthLoginBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogin>>, {data: PostAuthLoginBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiV1AuthLogin(data,requestOptions)
+          return  postAuthLogin(data,requestOptions)
         }
 
 
@@ -203,46 +171,27 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiV1AuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AuthLogin>>>
-    export type PostApiV1AuthLoginMutationBody = PostApiV1AuthLoginBody
-    export type PostApiV1AuthLoginMutationError = PostApiV1AuthLogin401
+    export type PostAuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogin>>>
+    export type PostAuthLoginMutationBody = PostAuthLoginBody
+    export type PostAuthLoginMutationError = PostAuthLogin401
 
     /**
  * @summary Authenticate a user
  */
-export const usePostApiV1AuthLogin = <TError = PostApiV1AuthLogin401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AuthLogin>>, TError,{data: PostApiV1AuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostAuthLogin = <TError = PostAuthLogin401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogin>>, TError,{data: PostAuthLoginBody}, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiV1AuthLogin>>,
+        Awaited<ReturnType<typeof postAuthLogin>>,
         TError,
-        {data: PostApiV1AuthLoginBody},
+        {data: PostAuthLoginBody},
         TContext
       > => {
-      return useMutation(getPostApiV1AuthLoginMutationOptions(options), queryClient);
+      return useMutation(getPostAuthLoginMutationOptions(options), queryClient);
     }
     /**
  * @summary Get current authenticated user
  */
-export type getApiV1AuthMeResponse200 = {
-  data: GetApiV1AuthMe200
-  status: 200
-}
-
-export type getApiV1AuthMeResponse401 = {
-  data: GetApiV1AuthMe401
-  status: 401
-}
-
-export type getApiV1AuthMeResponseSuccess = (getApiV1AuthMeResponse200) & {
-  headers: Headers;
-};
-export type getApiV1AuthMeResponseError = (getApiV1AuthMeResponse401) & {
-  headers: Headers;
-};
-
-export type getApiV1AuthMeResponse = (getApiV1AuthMeResponseSuccess | getApiV1AuthMeResponseError)
-
-export const getGetApiV1AuthMeUrl = () => {
+export const getGetAuthMeUrl = () => {
 
 
 
@@ -250,9 +199,9 @@ export const getGetApiV1AuthMeUrl = () => {
   return `/api/v1/auth/me`
 }
 
-export const getApiV1AuthMe = async ( options?: RequestInit): Promise<getApiV1AuthMeResponse> => {
+export const getAuthMe = async ( options?: RequestInit): Promise<GetAuthMe200> => {
 
-  return customInstance<getApiV1AuthMeResponse>(getGetApiV1AuthMeUrl(),
+  return apiClient<GetAuthMe200>(getGetAuthMeUrl(),
   {
     ...options,
     method: 'GET'
@@ -265,69 +214,159 @@ export const getApiV1AuthMe = async ( options?: RequestInit): Promise<getApiV1Au
 
 
 
-export const getGetApiV1AuthMeQueryKey = () => {
+export const getGetAuthMeInfiniteQueryKey = () => {
+    return [
+    'infinite', `/api/v1/auth/me`
+    ] as const;
+    }
+
+export const getGetAuthMeQueryKey = () => {
     return [
     `/api/v1/auth/me`
     ] as const;
     }
 
 
-export const getGetApiV1AuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAuthMeInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>, TError = GetAuthMe401>( options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AuthMeQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthMeInfiniteQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AuthMe>>> = ({ signal }) => getApiV1AuthMe({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn,   staleTime: 60000,  ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiV1AuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AuthMe>>>
-export type GetApiV1AuthMeQueryError = GetApiV1AuthMe401
+export type GetAuthMeInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>
+export type GetAuthMeInfiniteQueryError = GetAuthMe401
 
 
-export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>> & Pick<
+export function useGetAuthMeInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>, TError = GetAuthMe401>(
+  options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1AuthMe>>,
+          Awaited<ReturnType<typeof getAuthMe>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1AuthMe>>
+          Awaited<ReturnType<typeof getAuthMe>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthMeInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthMe>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthMeInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current authenticated user
+ */
+
+export function useGetAuthMeInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAuthMeInfiniteQueryOptions(options)
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+/**
+ * @summary Get current authenticated user
+ */
+export const useSetGetAuthMeInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (updater: InfiniteData<Awaited<ReturnType<typeof getAuthMe>>> | undefined | ((old: InfiniteData<Awaited<ReturnType<typeof getAuthMe>>> | undefined) => InfiniteData<Awaited<ReturnType<typeof getAuthMe>>> | undefined)) => {
+    queryClient.setQueryData(getGetAuthMeInfiniteQueryKey(), updater);
+  };
+}
+
+/**
+ * @summary Get current authenticated user
+ */
+export const useGetGetAuthMeInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.getQueryData<InfiniteData<Awaited<ReturnType<typeof getAuthMe>>>>(getGetAuthMeInfiniteQueryKey());
+}
+
+
+export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = GetAuthMe401>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn,   staleTime: 60000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>
+export type GetAuthMeQueryError = GetAuthMe401
+
+
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = GetAuthMe401>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthMe>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>> & Pick<
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiV1AuthMe>>,
+          Awaited<ReturnType<typeof getAuthMe>>,
           TError,
-          Awaited<ReturnType<typeof getApiV1AuthMe>>
+          Awaited<ReturnType<typeof getAuthMe>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
+      >, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get current authenticated user
  */
 
-export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1AuthMe>>, TError = GetApiV1AuthMe401>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = GetAuthMe401>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiV1AuthMeQueryOptions(options)
+  const queryOptions = getGetAuthMeQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -336,6 +375,23 @@ export function useGetApiV1AuthMe<TData = Awaited<ReturnType<typeof getApiV1Auth
 
 
 
+/**
+ * @summary Get current authenticated user
+ */
+export const useSetGetAuthMeQueryData = () => {
+  const queryClient = useQueryClient();
+  return (updater: Awaited<ReturnType<typeof getAuthMe>> | undefined | ((old: Awaited<ReturnType<typeof getAuthMe>> | undefined) => Awaited<ReturnType<typeof getAuthMe>> | undefined)) => {
+    queryClient.setQueryData(getGetAuthMeQueryKey(), updater);
+  };
+}
 
+/**
+ * @summary Get current authenticated user
+ */
+export const useGetGetAuthMeQueryData = () => {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getAuthMe>>>(getGetAuthMeQueryKey());
+}
 
 
