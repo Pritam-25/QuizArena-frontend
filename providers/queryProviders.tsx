@@ -11,7 +11,7 @@ import { SocketConnectionStatus } from "@/components/socket/SocketConnectionStat
 
 // TEMP: Debug widget for socket state
 import { SocketDebug } from "@/components/socket/SocketDebug";
-import { ApiError } from "next/dist/server/api-utils";
+import { AppError } from "@/lib/api/api-error";
 import { toast } from "sonner";
 import { env } from "@/lib/env";
 
@@ -37,7 +37,7 @@ function makeQueryClient(): QueryClient {
       mutations: {
         retry: 0, // do not retry mutations by default
         onError: (error) => {
-          if (error instanceof ApiError) {
+          if (error instanceof AppError) {
             toast.error(error.message || "Something went wrong");
           } else {
             toast.error("Network error, please try again");
@@ -102,7 +102,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <SocketProvider>
         {children}
         {/* TEMP: Debug widget for socket state  */}
-        {env.NODE_ENV === "development" && <SocketDebug />}
+        {process.env.NODE_ENV === "development" && <SocketDebug />}
         {/* Rendered inside SocketProvider so it can call useSocket() */}
         <SocketStatusBridge />
       </SocketProvider>

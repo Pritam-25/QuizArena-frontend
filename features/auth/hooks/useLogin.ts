@@ -1,8 +1,9 @@
-import { useRouter } from 'next/navigation';
-import { usePostAuthLogin } from '@/api/auth/auth';
-import { handleError } from '@/lib/api/handleError';
-import { useAppMutation } from '@/lib/api/mutation-factory';
-import { queryKeys } from '@/lib/api/keys';
+import { useRouter } from "next/navigation";
+import { usePostAuthLogin } from "@/api/auth/auth";
+import { handleError } from "@/lib/api/handleError";
+import { useMutationHandler } from "@/lib/api/useMutationHandler";
+import { queryKeys } from "@/lib/api/keys";
+import { PostAuthLogin200Data } from "@/api/model/postAuthLogin200Data";
 
 /**
  * useLogin
@@ -53,20 +54,20 @@ import { queryKeys } from '@/lib/api/keys';
 export function useLogin() {
   const router = useRouter();
 
+  const handleSuccess = useMutationHandler<PostAuthLogin200Data>({
+    successMessage: "Login successful",
+    setData: [
+      {
+        key: () => queryKeys.auth.me(),
+      },
+    ],
+  });
+
   return usePostAuthLogin({
     mutation: {
-      ...useAppMutation({
-        successMessage: 'Login successful',
-
-        setData: [
-          {
-            key: () => queryKeys.auth.me(),
-          },
-        ],
-      }),
-
-      onSuccess: () => {
-        router.replace('/');
+      onSuccess: (res) => {
+        handleSuccess(res);
+        router.replace("/");
       },
 
       /**
