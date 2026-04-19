@@ -11,6 +11,9 @@ import { SocketConnectionStatus } from "@/components/socket/SocketConnectionStat
 
 // TEMP: Debug widget for socket state
 import { SocketDebug } from "@/components/socket/SocketDebug";
+import { ApiError } from "next/dist/server/api-utils";
+import { toast } from "sonner";
+import { env } from "@/lib/env";
 
 /**
  * Creates a new QueryClient instance with default configuration.
@@ -32,7 +35,14 @@ function makeQueryClient(): QueryClient {
         refetchOnWindowFocus: false, // optional (reduce noise)
       },
       mutations: {
-        retry: 0,
+        retry: 0, // do not retry mutations by default
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(error.message || "Something went wrong");
+          } else {
+            toast.error("Network error, please try again");
+          }
+        },
       },
     },
   });
@@ -74,8 +84,6 @@ function getQueryClient(): QueryClient {
  * @param {Object} props
  * @param {React.ReactNode} props.children - Application components
  *
- * @returns {JSX.Element}
- *
  * @description
  * - Wraps the app with React Query provider
  * - Attaches React Query Devtools (only in development)
@@ -93,8 +101,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <SocketProvider>
         {children}
-        {/* TEMP: Debug widget for socket state (remove after testing) */}
-        <SocketDebug />
+        {/* TEMP: Debug widget for socket state  */}
+        {env.NODE_ENV === "development" && <SocketDebug />}
         {/* Rendered inside SocketProvider so it can call useSocket() */}
         <SocketStatusBridge />
       </SocketProvider>

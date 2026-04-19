@@ -1,4 +1,4 @@
-import { ApiResponse, handleApiResponse } from "./handleApi";
+import { ApiResponse, handleApiResponse } from "./apiResponse";
 import { handleError } from "./handleError";
 
 /**
