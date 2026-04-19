@@ -3,6 +3,9 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Providers from "../providers/queryProviders";
+import { ThemeProvider } from "@/components/web/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistMonoHeading = Geist_Mono({
   subsets: ["latin"],
@@ -35,6 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -46,7 +50,18 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <Providers>
+              {children}
+              <Toaster richColors />
+            </Providers>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
