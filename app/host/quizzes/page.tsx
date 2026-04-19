@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useGetQuizzes } from "@/api/quiz/quiz";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import { useGetQuizzes } from '@/api/quiz/quiz';
+import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function QuizzesPage() {
   const { data, isLoading, isError } = useGetQuizzes();
@@ -23,12 +23,12 @@ export default function QuizzesPage() {
           </CardContent>
         </Card>
       ) : (
-        quizzes.map((quiz) => (
+        quizzes.map(quiz => (
           <Link
             key={quiz.id}
             href={`/host/quizzes/${quiz.id}`}
             className="w-full max-w-xl"
-            style={{ textDecoration: "none" }}
+            style={{ textDecoration: 'none' }}
           >
             <Card className="w-full max-w-xl cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="p-6">

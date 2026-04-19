@@ -1,30 +1,32 @@
-// lib/api/client.ts
-import { AppError } from "@/lib/api/api-error";
-import { env } from "@/lib/env";
+import { AppError } from '@/lib/api/api-error';
+import { env } from '@/lib/env';
 
 const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function apiClient<T>(
   url: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${baseUrl}${url}`, {
-    ...options,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
+  const fullUrl = `${baseUrl}${url}`;
+
+  const res = await fetch(fullUrl, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers ?? {}),
+    },
   });
 
   if (!res.ok) {
     const errPayload = await res.json().catch(() => null);
+
     throw new AppError({
-      message: errPayload?.message || res.statusText,
-      statusCode: errPayload?.statusCode || res.status,
-      errorCode: errPayload?.errorCode || "UNKNOWN_ERROR",
-      details: errPayload?.details,
+      message: errPayload?.error.message || res.statusText,
+      statusCode: errPayload?.error.statusCode || res.status,
+      errorCode: errPayload?.error.errorCode || 'UNKNOWN_ERROR',
+      details: errPayload?.error.details,
     });
   }
 
   const json = await res.json();
-
-  return json;
+  return json as T;
 }

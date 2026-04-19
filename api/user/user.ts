@@ -9,7 +9,7 @@ import {
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient
+  useQueryClient,
 } from '@tanstack/react-query';
 import type {
   DataTag,
@@ -27,297 +27,468 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
+  UseQueryResult,
 } from '@tanstack/react-query';
 
 import type {
   GetUsersId200,
   GetUsersId404,
   PostUsers201,
-  PostUsersBody
+  PostUsersBody,
 } from '../model';
 
 import { apiClient } from '../../lib/api/client';
 
-
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
 
 /**
  * @summary Create user
  */
 export const getPostUsersUrl = () => {
+  return `/api/v1/users`;
+};
 
-
-
-
-  return `/api/v1/users`
-}
-
-export const postUsers = async (postUsersBody: PostUsersBody, options?: RequestInit): Promise<PostUsers201> => {
-
-  return apiClient<PostUsers201>(getPostUsersUrl(),
-  {
+export const postUsers = async (
+  postUsersBody: PostUsersBody,
+  options?: RequestInit
+): Promise<PostUsers201> => {
+  return apiClient<PostUsers201>(getPostUsersUrl(), {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      postUsersBody,)
-  }
-);}
+    body: JSON.stringify(postUsersBody),
+  });
+};
 
+export const getPostUsersMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postUsers>>,
+    TError,
+    { data: PostUsersBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postUsers>>,
+  TError,
+  { data: PostUsersBody },
+  TContext
+> => {
+  const mutationKey = ['postUsers'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postUsers>>,
+    { data: PostUsersBody }
+  > = props => {
+    const { data } = props ?? {};
 
+    return postUsers(data, requestOptions);
+  };
 
-export const getPostUsersMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: PostUsersBody}, TContext>, request?: SecondParameter<typeof apiClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: PostUsersBody}, TContext> => {
+  return { mutationFn, ...mutationOptions };
+};
 
-const mutationKey = ['postUsers'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+export type PostUsersMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postUsers>>
+>;
+export type PostUsersMutationBody = PostUsersBody;
+export type PostUsersMutationError = unknown;
 
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsers>>, {data: PostUsersBody}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postUsers(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostUsersMutationResult = NonNullable<Awaited<ReturnType<typeof postUsers>>>
-    export type PostUsersMutationBody = PostUsersBody
-    export type PostUsersMutationError = unknown
-
-    /**
+/**
  * @summary Create user
  */
-export const usePostUsers = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: PostUsersBody}, TContext>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postUsers>>,
-        TError,
-        {data: PostUsersBody},
-        TContext
-      > => {
-      return useMutation(getPostUsersMutationOptions(options), queryClient);
-    }
-    /**
+export const usePostUsers = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postUsers>>,
+      TError,
+      { data: PostUsersBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postUsers>>,
+  TError,
+  { data: PostUsersBody },
+  TContext
+> => {
+  return useMutation(getPostUsersMutationOptions(options), queryClient);
+};
+/**
  * @summary Get user by id
  */
-export const getGetUsersIdUrl = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
-
-
-
-
-  return `/api/v1/users/${id}`
-}
-
-export const getUsersId = async (id: string = '123e4567-e89b-12d3-a456-426614174000', options?: RequestInit): Promise<GetUsersId200> => {
-
-  return apiClient<GetUsersId200>(getGetUsersIdUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetUsersIdInfiniteQueryKey = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
-    return [
-    'infinite', `/api/v1/users/${id}`
-    ] as const;
-    }
-
-export const getGetUsersIdQueryKey = (id: string = '123e4567-e89b-12d3-a456-426614174000',) => {
-    return [
-    `/api/v1/users/${id}`
-    ] as const;
-    }
-
-
-export const getGetUsersIdInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>, TError = GetUsersId404>(id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+export const getGetUsersIdUrl = (
+  id: string = '123e4567-e89b-12d3-a456-426614174000'
 ) => {
+  return `/api/v1/users/${id}`;
+};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+export const getUsersId = async (
+  id: string = '123e4567-e89b-12d3-a456-426614174000',
+  options?: RequestInit
+): Promise<GetUsersId200> => {
+  return apiClient<GetUsersId200>(getGetUsersIdUrl(id), {
+    ...options,
+    method: 'GET',
+  });
+};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUsersIdInfiniteQueryKey(id);
+export const getGetUsersIdInfiniteQueryKey = (
+  id: string = '123e4567-e89b-12d3-a456-426614174000'
+) => {
+  return ['infinite', `/api/v1/users/${id}`] as const;
+};
 
+export const getGetUsersIdQueryKey = (
+  id: string = '123e4567-e89b-12d3-a456-426614174000'
+) => {
+  return [`/api/v1/users/${id}`] as const;
+};
 
+export const getGetUsersIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
+  TError = GetUsersId404,
+>(
+  id: string = '123e4567-e89b-12d3-a456-426614174000',
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({ signal }) => getUsersId(id, { signal, ...requestOptions });
+  const queryKey = queryOptions?.queryKey ?? getGetUsersIdInfiniteQueryKey(id);
 
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({
+    signal,
+  }) => getUsersId(id, { signal, ...requestOptions });
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    staleTime: 60000,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getUsersId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type GetUsersIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUsersId>>
+>;
+export type GetUsersIdInfiniteQueryError = GetUsersId404;
 
-
-   return  { queryKey, queryFn, enabled: !!(id),  staleTime: 60000,  ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetUsersIdInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersId>>>
-export type GetUsersIdInfiniteQueryError = GetUsersId404
-
-
-export function useGetUsersIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>, TError = GetUsersId404>(
- id: undefined |  string, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> & Pick<
+export function useGetUsersIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
+  TError = GetUsersId404,
+>(
+  id: undefined | string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getUsersId>>,
           TError,
           Awaited<ReturnType<typeof getUsersId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUsersIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>, TError = GetUsersId404>(
- id?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> & Pick<
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUsersIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
+  TError = GetUsersId404,
+>(
+  id?: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getUsersId>>,
           TError,
           Awaited<ReturnType<typeof getUsersId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUsersIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>, TError = GetUsersId404>(
- id?: string, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUsersIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
+  TError = GetUsersId404,
+>(
+  id?: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Get user by id
  */
 
-export function useGetUsersIdInfinite<TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>, TError = GetUsersId404>(
- id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
- ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetUsersIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
+  TError = GetUsersId404,
+>(
+  id: string = '123e4567-e89b-12d3-a456-426614174000',
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUsersIdInfiniteQueryOptions(id, options);
 
-  const queryOptions = getGetUsersIdInfiniteQueryOptions(id,options)
-
-  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
 
 /**
  * @summary Get user by id
  */
 export const useSetGetUsersIdInfiniteQueryData = () => {
   const queryClient = useQueryClient();
-  return (id: string = '123e4567-e89b-12d3-a456-426614174000',updater: InfiniteData<Awaited<ReturnType<typeof getUsersId>>> | undefined | ((old: InfiniteData<Awaited<ReturnType<typeof getUsersId>>> | undefined) => InfiniteData<Awaited<ReturnType<typeof getUsersId>>> | undefined)) => {
+  return (
+    id: string = '123e4567-e89b-12d3-a456-426614174000',
+    updater:
+      | InfiniteData<Awaited<ReturnType<typeof getUsersId>>>
+      | undefined
+      | ((
+          old: InfiniteData<Awaited<ReturnType<typeof getUsersId>>> | undefined
+        ) => InfiniteData<Awaited<ReturnType<typeof getUsersId>>> | undefined)
+  ) => {
     queryClient.setQueryData(getGetUsersIdInfiniteQueryKey(id), updater);
   };
-}
+};
 
 /**
  * @summary Get user by id
  */
 export const useGetGetUsersIdInfiniteQueryData = () => {
   const queryClient = useQueryClient();
-  return (id: string = '123e4567-e89b-12d3-a456-426614174000',) =>
-    queryClient.getQueryData<InfiniteData<Awaited<ReturnType<typeof getUsersId>>>>(getGetUsersIdInfiniteQueryKey(id));
-}
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000') =>
+    queryClient.getQueryData<
+      InfiniteData<Awaited<ReturnType<typeof getUsersId>>>
+    >(getGetUsersIdInfiniteQueryKey(id));
+};
 
-
-export const getGetUsersIdQueryOptions = <TData = Awaited<ReturnType<typeof getUsersId>>, TError = GetUsersId404>(id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
+export const getGetUsersIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId404,
+>(
+  id: string = '123e4567-e89b-12d3-a456-426614174000',
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  }
 ) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetUsersIdQueryKey(id);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUsersIdQueryKey(id);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({
+    signal,
+  }) => getUsersId(id, { signal, ...requestOptions });
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    staleTime: 60000,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUsersId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type GetUsersIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUsersId>>
+>;
+export type GetUsersIdQueryError = GetUsersId404;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({ signal }) => getUsersId(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(id),  staleTime: 60000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetUsersIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersId>>>
-export type GetUsersIdQueryError = GetUsersId404
-
-
-export function useGetUsersId<TData = Awaited<ReturnType<typeof getUsersId>>, TError = GetUsersId404>(
- id: undefined |  string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> & Pick<
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId404,
+>(
+  id: undefined | string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getUsersId>>,
           TError,
           Awaited<ReturnType<typeof getUsersId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUsersId<TData = Awaited<ReturnType<typeof getUsersId>>, TError = GetUsersId404>(
- id?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> & Pick<
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId404,
+>(
+  id?: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getUsersId>>,
           TError,
           Awaited<ReturnType<typeof getUsersId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUsersId<TData = Awaited<ReturnType<typeof getUsersId>>, TError = GetUsersId404>(
- id?: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId404,
+>(
+  id?: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Get user by id
  */
 
-export function useGetUsersId<TData = Awaited<ReturnType<typeof getUsersId>>, TError = GetUsersId404>(
- id: string = '123e4567-e89b-12d3-a456-426614174000', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId404,
+>(
+  id: string = '123e4567-e89b-12d3-a456-426614174000',
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUsersIdQueryOptions(id, options);
 
-  const queryOptions = getGetUsersIdQueryOptions(id,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
 
 /**
  * @summary Get user by id
  */
 export const useSetGetUsersIdQueryData = () => {
   const queryClient = useQueryClient();
-  return (id: string = '123e4567-e89b-12d3-a456-426614174000',updater: Awaited<ReturnType<typeof getUsersId>> | undefined | ((old: Awaited<ReturnType<typeof getUsersId>> | undefined) => Awaited<ReturnType<typeof getUsersId>> | undefined)) => {
+  return (
+    id: string = '123e4567-e89b-12d3-a456-426614174000',
+    updater:
+      | Awaited<ReturnType<typeof getUsersId>>
+      | undefined
+      | ((
+          old: Awaited<ReturnType<typeof getUsersId>> | undefined
+        ) => Awaited<ReturnType<typeof getUsersId>> | undefined)
+  ) => {
     queryClient.setQueryData(getGetUsersIdQueryKey(id), updater);
   };
-}
+};
 
 /**
  * @summary Get user by id
  */
 export const useGetGetUsersIdQueryData = () => {
   const queryClient = useQueryClient();
-  return (id: string = '123e4567-e89b-12d3-a456-426614174000',) =>
-    queryClient.getQueryData<Awaited<ReturnType<typeof getUsersId>>>(getGetUsersIdQueryKey(id));
-}
-
-
+  return (id: string = '123e4567-e89b-12d3-a456-426614174000') =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getUsersId>>>(
+      getGetUsersIdQueryKey(id)
+    );
+};

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,13 +6,13 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { CreateQuizInput, createQuizSchema } from "@/lib/schemas/index";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { useCreateQuiz } from "@/features/quiz/hooks/useCreateQuiz";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { CreateQuizInput, createQuizSchema } from '@/lib/schemas/index';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
+import { useCreateQuiz } from '@/features/quiz/hooks/useCreateQuiz';
 
 /**
  * CreateQuizModal Component
@@ -39,7 +39,7 @@ export default function CreateQuizModal({
   const form = useForm<CreateQuizInput>({
     resolver: zodResolver(createQuizSchema),
     defaultValues: {
-      title: "Untitled Quiz",
+      title: 'Untitled Quiz',
       description: undefined,
     },
   });
@@ -84,7 +84,7 @@ export default function CreateQuizModal({
                   <Input
                     id="title"
                     placeholder="Quiz Title"
-                    {...form.register("title")}
+                    {...form.register('title')}
                   />
                   {form.formState.errors.title && (
                     <p className="text-sm text-destructive">
@@ -97,7 +97,7 @@ export default function CreateQuizModal({
                   <Input
                     id="description"
                     placeholder="Quiz Description"
-                    {...form.register("description")}
+                    {...form.register('description')}
                   />
                   {form.formState.errors.description && (
                     <p className="text-sm text-destructive">
@@ -112,8 +112,8 @@ export default function CreateQuizModal({
                     type="submit"
                   >
                     {form.formState.isSubmitting || isPending
-                      ? "Saving..."
-                      : "Save Quiz"}
+                      ? 'Saving...'
+                      : 'Save Quiz'}
                   </Button>
                 </DialogFooter>
               </div>

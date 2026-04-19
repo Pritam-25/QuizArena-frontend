@@ -1,15 +1,15 @@
-import { usePostAuthRegister } from "@/api/auth/auth";
-import { handleError } from "@/lib/api/handleError";
-import { useRouter } from "next/navigation";
-import { useMutationHandler } from "@/lib/api/useMutationHandler";
-import { queryKeys } from "@/lib/api/keys";
-import { PostAuthRegister201Data } from "@/api/model";
+import { usePostAuthRegister } from '@/api/auth/auth';
+import { handleError } from '@/lib/api/handleError';
+import { useRouter } from 'next/navigation';
+import { useMutationHandler } from '@/lib/api/useMutationHandler';
+import { queryKeys } from '@/lib/api/keys';
+import { PostAuthRegister201Data } from '@/api/model';
 
 export function useRegister() {
   const router = useRouter();
 
   const handleSuccess = useMutationHandler<PostAuthRegister201Data>({
-    successMessage: "Registration successful",
+    successMessage: 'Registration successful',
     setData: [
       {
         key: () => queryKeys.auth.me(),
@@ -19,9 +19,9 @@ export function useRegister() {
 
   return usePostAuthRegister({
     mutation: {
-      onSuccess: (res) => {
+      onSuccess: res => {
         handleSuccess(res);
-        router.replace("/");
+        router.replace('/');
       },
 
       /**

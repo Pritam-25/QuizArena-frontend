@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { SignupInput, signupSchema } from "@/lib/schemas/auth.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { PasswordInput } from "./passwordInput";
-import { Loader2 } from "lucide-react";
-import { usePostApiV1AuthRegister } from "@/api/auth/auth";
-import { handleMutation } from "@/lib/api/mutationWrapper";
-import { handleError } from "@/lib/api/handleError";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { SignupInput, signupSchema } from '@/lib/schemas/auth.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { PasswordInput } from './passwordInput';
+import { Loader2 } from 'lucide-react';
+import { usePostApiV1AuthRegister } from '@/api/auth/auth';
+import { handleMutation } from '@/lib/api/mutationWrapper';
+import { handleError } from '@/lib/api/handleError';
 
 /**
  * SignUpForm Component
@@ -31,7 +31,7 @@ import { handleError } from "@/lib/api/handleError";
 export function SignUpForm({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<'div'>) {
   const router = useRouter();
 
   const { mutate, isPending } = usePostApiV1AuthRegister();
@@ -42,9 +42,9 @@ export function SignUpForm({
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      username: "",
-      email: "",
-      password: "",
+      username: '',
+      email: '',
+      password: '',
     },
   });
 
@@ -57,19 +57,19 @@ export function SignUpForm({
     mutate(
       { data: values },
       {
-        onSuccess: (res) => {
+        onSuccess: res => {
           handleMutation(res, (_data, message) => {
-            toast.success(message || "Successfully signed up!");
-            router.replace("/login");
+            toast.success(message || 'Successfully signed up!');
+            router.replace('/login');
           });
         },
         onError: handleError,
-      },
+      }
     );
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="p-0">
           <form
@@ -93,7 +93,7 @@ export function SignUpForm({
                       id="username"
                       placeholder="Your username"
                       autoFocus
-                      {...form.register("username")}
+                      {...form.register('username')}
                     />
                     {form.formState.errors.username && (
                       <p className="text-sm text-destructive">
@@ -109,7 +109,7 @@ export function SignUpForm({
                       id="email"
                       type="email"
                       placeholder="m@example.com"
-                      {...form.register("email")}
+                      {...form.register('email')}
                     />
                     {form.formState.errors.email && (
                       <p className="text-sm text-destructive">
@@ -124,7 +124,7 @@ export function SignUpForm({
                     <PasswordInput
                       id="password"
                       placeholder="••••••••"
-                      {...form.register("password")}
+                      {...form.register('password')}
                     />
                     {form.formState.errors.password && (
                       <p className="text-sm text-destructive">
@@ -145,13 +145,13 @@ export function SignUpForm({
                           Signing up...
                         </span>
                       ) : (
-                        "Sign Up"
+                        'Sign Up'
                       )}
                     </Button>
                   </div>
 
                   <div className="text-center text-sm">
-                    Already have an account?{" "}
+                    Already have an account?{' '}
                     <Link
                       href="/login"
                       className="underline underline-offset-4"

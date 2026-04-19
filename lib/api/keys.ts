@@ -1,5 +1,5 @@
-import { getGetAuthMeQueryKey } from "@/api/auth/auth";
-import { getGetQuizzesQueryKey } from "@/api/quiz/quiz";
+import { getGetAuthMeQueryKey } from '@/api/auth/auth';
+import { getGetQuizzesQueryKey } from '@/api/quiz/quiz';
 
 export const queryKeys = {
   auth: {

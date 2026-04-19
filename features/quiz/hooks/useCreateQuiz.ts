@@ -1,9 +1,9 @@
-import { PostQuizzes201Data } from "@/api/model";
-import { getGetQuizzesIdQueryKey, usePostQuizzes } from "@/api/quiz/quiz";
+import { PostQuizzes201Data } from '@/api/model';
+import { getGetQuizzesIdQueryKey, usePostQuizzes } from '@/api/quiz/quiz';
 
-import { queryKeys } from "@/lib/api/keys";
-import { useMutationHandler } from "@/lib/api/useMutationHandler";
-import { useRouter } from "next/navigation";
+import { queryKeys } from '@/lib/api/keys';
+import { useMutationHandler } from '@/lib/api/useMutationHandler';
+import { useRouter } from 'next/navigation';
 
 /**
  * useCreateQuiz Hook
@@ -54,11 +54,11 @@ export function useCreateQuiz() {
   const router = useRouter();
 
   const handleSuccess = useMutationHandler<PostQuizzes201Data>({
-    successMessage: "Quiz created successfully",
+    successMessage: 'Quiz created successfully',
 
     setData: [
       {
-        key: (data) => getGetQuizzesIdQueryKey(data.id),
+        key: data => getGetQuizzesIdQueryKey(data.id),
       },
     ],
 
@@ -67,7 +67,7 @@ export function useCreateQuiz() {
 
   return usePostQuizzes({
     mutation: {
-      onSuccess: (res) => {
+      onSuccess: res => {
         const { data: quiz } = res;
 
         // 1. cache + toast

@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { loginSchema, LoginInput } from "@/lib/schemas/auth.schema";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { PasswordInput } from "./passwordInput";
-import { Loader2 } from "lucide-react";
-import { usePostApiV1AuthLogin } from "@/api/auth/auth";
-import { handleMutation } from "@/lib/api/mutationWrapper";
-import { handleError } from "@/lib/api/handleError";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { loginSchema, LoginInput } from '@/lib/schemas/auth.schema';
+import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
+import { PasswordInput } from './passwordInput';
+import { Loader2 } from 'lucide-react';
+import { usePostApiV1AuthLogin } from '@/api/auth/auth';
+import { handleMutation } from '@/lib/api/mutationWrapper';
+import { handleError } from '@/lib/api/handleError';
 
 /**
  * LoginForm Component
@@ -31,7 +31,7 @@ import { handleError } from "@/lib/api/handleError";
 export function LoginForm({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<'div'>) {
   const router = useRouter();
 
   /**
@@ -40,8 +40,8 @@ export function LoginForm({
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -59,10 +59,10 @@ export function LoginForm({
     mutate(
       { data: values },
       {
-        onSuccess: (res) => {
+        onSuccess: res => {
           handleMutation(res, (_data, message) => {
-            toast.success(message || "Login successful");
-            router.replace("/");
+            toast.success(message || 'Login successful');
+            router.replace('/');
           });
         },
         onError: handleError,
@@ -71,7 +71,7 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="p-0">
           <form
@@ -97,7 +97,7 @@ export function LoginForm({
                       type="email"
                       placeholder="m@example.com"
                       autoFocus
-                      {...form.register("email")}
+                      {...form.register('email')}
                     />
                     {form.formState.errors.email && (
                       <p className="text-sm text-destructive">
@@ -112,7 +112,7 @@ export function LoginForm({
                     <PasswordInput
                       id="password"
                       placeholder="••••••••"
-                      {...form.register("password")}
+                      {...form.register('password')}
                     />
                     {form.formState.errors.password && (
                       <p className="text-sm text-destructive">
@@ -134,14 +134,14 @@ export function LoginForm({
                           Logging in...
                         </span>
                       ) : (
-                        "Login"
+                        'Login'
                       )}
                     </Button>
                   </div>
 
                   {/* Footer */}
                   <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
+                    Don&apos;t have an account?{' '}
                     <Link
                       href="/signup"
                       className="underline underline-offset-4"

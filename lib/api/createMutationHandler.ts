@@ -1,6 +1,6 @@
-import { QueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { ApiSuccess } from "./apiResponse";
+import { QueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { ApiSuccess } from './apiResponse';
 
 /**
  * Prefill cache config
@@ -37,7 +37,7 @@ type MutationConfig<TData> = {
  */
 export function createMutationHandler<TData>(
   queryClient: QueryClient,
-  config?: MutationConfig<TData>,
+  config?: MutationConfig<TData>
 ) {
   return (res: ApiSuccess<TData>) => {
     const { data, message } = res;
@@ -63,7 +63,7 @@ export function createMutationHandler<TData>(
     /**
      *  Invalidate queries
      */
-    config?.invalidate?.forEach((getKey) => {
+    config?.invalidate?.forEach(getKey => {
       queryClient.invalidateQueries({
         queryKey: getKey(),
       });

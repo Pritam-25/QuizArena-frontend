@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
 import {
   environmentManager,
   QueryClient,
   QueryClientProvider,
-} from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SocketProvider, useSocket } from "@/providers/SocketProvider";
-import { SocketConnectionStatus } from "@/components/socket/SocketConnectionStatus";
+} from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { SocketProvider, useSocket } from '@/providers/SocketProvider';
+import { SocketConnectionStatus } from '@/components/socket/SocketConnectionStatus';
 
 // TEMP: Debug widget for socket state
-import { SocketDebug } from "@/components/socket/SocketDebug";
+import { SocketDebug } from '@/components/socket/SocketDebug';
 
 /**
  * Creates a new QueryClient instance with default configuration.
