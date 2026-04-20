@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetHealth200DataStatus =
-  (typeof GetHealth200DataStatus)[keyof typeof GetHealth200DataStatus];
+export type GetHealth200DataStatus = typeof GetHealth200DataStatus[keyof typeof GetHealth200DataStatus];
+
 
 export const GetHealth200DataStatus = {
   healthy: 'healthy',

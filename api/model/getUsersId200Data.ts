@@ -5,9 +5,8 @@
  * Versioned backend contract for auth, user, quiz, and session
  * OpenAPI spec version: 1.0.0
  */
+import type { GetUsersId200DataUser } from './getUsersId200DataUser';
 
 export type GetUsersId200Data = {
-  id: string;
-  username: string;
-  email: string;
+  user: GetUsersId200DataUser;
 };

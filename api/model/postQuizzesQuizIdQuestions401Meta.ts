@@ -6,6 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostQuizzesQuizIdQuestions401Meta = {
-  [key: string]: unknown | null;
-};
+export type PostQuizzesQuizIdQuestions401Meta = {[key: string]: unknown | null};

@@ -13,4 +13,5 @@ export type PostQuizzesQuizIdQuestions201Data = {
   type: string;
   timeLimit: number;
   points: number;
+  order: string;
 };

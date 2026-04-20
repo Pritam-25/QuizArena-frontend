@@ -1,5 +1,12 @@
 import { useGetQuizzesId } from '@/api/quiz/quiz';
 import { useParams } from 'next/navigation';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function Page() {
   const params = useParams();
@@ -16,11 +23,17 @@ export default function Page() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">
-        Edit Course:
-        <span className="text-primary"> {quiz.title}</span>
-      </h1>
-      Quiz ID: {quizId}
+      <Card>
+        <CardHeader>
+          <CardTitle>Course Structure</CardTitle>
+          <CardDescription>
+            Provide information about the course structure
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <CourseStructure data={course} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

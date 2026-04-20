@@ -10,7 +10,7 @@ export default function QuizzesPage() {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Something went wrong</p>;
 
-  const quizzes = data?.data ?? [];
+  const quizzes = data?.data || [];
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center gap-4">

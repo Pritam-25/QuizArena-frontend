@@ -6,6 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesQuizIdQuestionsQuestionIdReorder200Meta = {
-  [key: string]: unknown | null;
-};
+export type PatchQuizzesQuizIdQuestionsQuestionIdReorder200Meta = {[key: string]: unknown | null};

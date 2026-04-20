@@ -7,15 +7,12 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { loginSchema, LoginInput } from '@/lib/schemas/auth.schema';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { PasswordInput } from './passwordInput';
 import { Loader2 } from 'lucide-react';
-import { usePostApiV1AuthLogin } from '@/api/auth/auth';
-import { handleMutation } from '@/lib/api/mutationWrapper';
-import { handleError } from '@/lib/api/handleError';
+import { usePostAuthLogin } from '@/api/auth/auth';
 
 /**
  * LoginForm Component
@@ -25,14 +22,11 @@ import { handleError } from '@/lib/api/handleError';
  * - Uses React Query mutation (Orval generated)
  * - Displays validation + API errors
  * - Redirects user on successful login
- *
- * @returns {JSX.Element}
  */
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const router = useRouter();
 
   /**
    * React Hook Form setup with Zod validation
@@ -48,26 +42,16 @@ export function LoginForm({
   /**
    * React Query mutation for login
    */
-  const { mutate, isPending } = usePostApiV1AuthLogin();
+  const { mutate, isPending } = usePostAuthLogin();
 
   /**
    * Handles form submission
    *
    * @param {LoginInput} values - User login credentials
    */
+
   const onSubmit = (values: LoginInput) => {
-    mutate(
-      { data: values },
-      {
-        onSuccess: res => {
-          handleMutation(res, (_data, message) => {
-            toast.success(message || 'Login successful');
-            router.replace('/');
-          });
-        },
-        onError: handleError,
-      }
-    );
+    mutate({ data: values });
   };
 
   return (

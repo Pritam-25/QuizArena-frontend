@@ -6,4 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostAuthRegister409Meta = { [key: string]: unknown | null };
+export type PostAuthRegister409Meta = {[key: string]: unknown | null};

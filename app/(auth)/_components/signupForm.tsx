@@ -13,8 +13,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { PasswordInput } from './passwordInput';
 import { Loader2 } from 'lucide-react';
-import { usePostApiV1AuthRegister } from '@/api/auth/auth';
-import { handleMutation } from '@/lib/api/mutationWrapper';
+import { usePostAuthRegister } from '@/api/auth/auth';
 import { handleError } from '@/lib/api/handleError';
 
 /**
@@ -34,7 +33,7 @@ export function SignUpForm({
 }: React.ComponentProps<'div'>) {
   const router = useRouter();
 
-  const { mutate, isPending } = usePostApiV1AuthRegister();
+  const { mutate, isPending } = usePostAuthRegister();
 
   /**
    * React Hook Form setup with Zod validation
@@ -54,18 +53,7 @@ export function SignUpForm({
    * @param {SignupInput} values - User registration credentials
    */
   const onSubmit = (values: SignupInput) => {
-    mutate(
-      { data: values },
-      {
-        onSuccess: res => {
-          handleMutation(res, (_data, message) => {
-            toast.success(message || 'Successfully signed up!');
-            router.replace('/login');
-          });
-        },
-        onError: handleError,
-      }
-    );
+    mutate({ data: values });
   };
 
   return (

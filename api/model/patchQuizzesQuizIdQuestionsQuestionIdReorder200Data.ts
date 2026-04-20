@@ -13,4 +13,5 @@ export type PatchQuizzesQuizIdQuestionsQuestionIdReorder200Data = {
   type: string;
   timeLimit: number;
   points: number;
+  order: string;
 };

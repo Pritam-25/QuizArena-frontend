@@ -6,11 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostQuizzesQuestionsQuestionIdOptions201DataItem = {
+export type PatchQuizzesQuestionsBulk200DataItem = {
   id: string;
-  title: string;
-  /** @nullable */
-  description?: string | null;
-  isPublished: boolean;
-  createdBy: string;
+  quizId: string;
+  questionText: string;
+  type: string;
+  timeLimit: number;
+  points: number;
+  order: string;
 };

@@ -5,12 +5,12 @@
  * Versioned backend contract for auth, user, quiz, and session
  * OpenAPI spec version: 1.0.0
  */
-import type { PostQuizzesQuestionsQuestionIdOptions201DataItem } from './postQuizzesQuestionsQuestionIdOptions201DataItem';
+import type { PostQuizzesQuestionsQuestionIdOptions201Data } from './postQuizzesQuestionsQuestionIdOptions201Data';
 import type { PostQuizzesQuestionsQuestionIdOptions201Meta } from './postQuizzesQuestionsQuestionIdOptions201Meta';
 
 export type PostQuizzesQuestionsQuestionIdOptions201 = {
   success: true;
   message: string;
-  data: PostQuizzesQuestionsQuestionIdOptions201DataItem[];
+  data: PostQuizzesQuestionsQuestionIdOptions201Data;
   meta?: PostQuizzesQuestionsQuestionIdOptions201Meta;
 };
