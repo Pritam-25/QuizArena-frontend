@@ -10,6 +10,8 @@ export async function apiClient<T>(
   const fullUrl = `${baseUrl}${url}`;
 
   const res = await fetch(fullUrl, {
+    ...options,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers ?? {}),
