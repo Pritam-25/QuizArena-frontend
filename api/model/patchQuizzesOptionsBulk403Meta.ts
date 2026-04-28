@@ -6,4 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesOptionsBulk403Meta = {[key: string]: unknown | null};
+export type PatchQuizzesOptionsBulk403Meta = { [key: string]: unknown | null };

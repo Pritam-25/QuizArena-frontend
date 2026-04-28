@@ -3,7 +3,7 @@ import { handleError } from '@/lib/api/handleError';
 import { useRouter } from 'next/navigation';
 import { useMutationHandler } from '@/lib/api/useMutationHandler';
 import { queryKeys } from '@/lib/api/keys';
-import { PostAuthRegister201Data } from '@/api/model';
+import { PostAuthRegister201Data, PostAuthRegisterBody } from '@/api/model';
 
 export function useRegister() {
   const router = useRouter();
@@ -19,15 +19,18 @@ export function useRegister() {
 
   return usePostAuthRegister({
     mutation: {
+      onMutate: vars => {
+        console.log('MUTATION CALLED', vars);
+      },
       onSuccess: res => {
+        console.log('SUCCESS', res);
         handleSuccess(res);
         router.replace('/');
       },
-
-      /**
-       * Triggered when registration API fails
-       */
-      onError: handleError,
+      onError: err => {
+        console.log('ERROR', err);
+        handleError(err);
+      },
     },
   });
 }

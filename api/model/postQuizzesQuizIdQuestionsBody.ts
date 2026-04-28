@@ -8,7 +8,7 @@
 
 export type PostQuizzesQuizIdQuestionsBody = {
   /** @minLength 1 */
-  questionText?: string;
+  questionText: string;
   type?: string;
   /** @minimum 0 */
   timeLimit?: number;

@@ -5,6 +5,7 @@
  * Versioned backend contract for auth, user, quiz, and session
  * OpenAPI spec version: 1.0.0
  */
+import type { PostQuizzesQuizIdQuestions201DataOptionsItem } from './postQuizzesQuizIdQuestions201DataOptionsItem';
 
 export type PostQuizzesQuizIdQuestions201Data = {
   id: string;
@@ -14,4 +15,5 @@ export type PostQuizzesQuizIdQuestions201Data = {
   timeLimit: number;
   points: number;
   order: string;
+  options: PostQuizzesQuizIdQuestions201DataOptionsItem[];
 };

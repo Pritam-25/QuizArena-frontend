@@ -13,6 +13,7 @@ import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { PasswordInput } from './passwordInput';
 import { Loader2 } from 'lucide-react';
 import { usePostAuthLogin } from '@/api/auth/auth';
+import { useLogin } from '@/features/auth/hooks/useLogin';
 
 /**
  * LoginForm Component
@@ -27,7 +28,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-
   /**
    * React Hook Form setup with Zod validation
    */
@@ -42,7 +42,7 @@ export function LoginForm({
   /**
    * React Query mutation for login
    */
-  const { mutate, isPending } = usePostAuthLogin();
+  const { mutate, isPending } = useLogin();
 
   /**
    * Handles form submission
@@ -69,7 +69,7 @@ export function LoginForm({
                   <div className="flex flex-col items-center text-center">
                     <h1 className="text-2xl font-bold">Welcome back</h1>
                     <p className="text-muted-foreground text-balance">
-                      Login to your Primetrade account
+                      Login to your QuizArena account
                     </p>
                   </div>
 

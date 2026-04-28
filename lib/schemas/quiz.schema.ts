@@ -95,15 +95,10 @@ export const addOptionsSchema = z.object({
   isCorrect: z.boolean().default(false),
 });
 
-export type CreateQuizInputDto = z.infer<typeof createQuizSchema>;
-/**
- * Service-layer quiz payload that includes creator identity.
- */
-export type CreateQuizDto = CreateQuizInputDto & { createdBy: string };
-export type AddQuestionDto = z.infer<typeof addQuestionSchema>;
-export type AddQuestionInputDto = Omit<
-  AddQuestionDto,
+export type AddQuestionInput = z.infer<typeof addQuestionSchema>;
+export type AddQuestionInputInput = Omit<
+  AddQuestionInput,
   'prevOrder' | 'nextOrder'
 >;
-export type ReorderQuestionDto = z.infer<typeof reorderQuestionSchema>;
-export type AddOptionsDto = z.infer<typeof addOptionsSchema>;
+export type ReorderQuestionInput = z.infer<typeof reorderQuestionSchema>;
+export type AddOptionsInput = z.infer<typeof addOptionsSchema>;

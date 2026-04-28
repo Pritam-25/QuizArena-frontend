@@ -6,4 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesQuestionsBulk200Meta = {[key: string]: unknown | null};
+export type PatchQuizzesQuestionsBulk200Meta = {
+  [key: string]: unknown | null;
+};

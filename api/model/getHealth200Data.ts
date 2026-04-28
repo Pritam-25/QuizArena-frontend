@@ -12,4 +12,4 @@ export type GetHealth200Data = {
   timestamp: string;
   uptime: number;
   [key: string]: unknown;
- };
+};

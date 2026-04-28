@@ -9,12 +9,9 @@ import { SignupInput, signupSchema } from '@/lib/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { PasswordInput } from './passwordInput';
 import { Loader2 } from 'lucide-react';
-import { usePostAuthRegister } from '@/api/auth/auth';
-import { handleError } from '@/lib/api/handleError';
+import { useRegister } from '@/features/auth/hooks/useRegister';
 
 /**
  * SignUpForm Component
@@ -31,9 +28,7 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const router = useRouter();
-
-  const { mutate, isPending } = usePostAuthRegister();
+  const { mutate, isPending } = useRegister();
 
   /**
    * React Hook Form setup with Zod validation
@@ -53,6 +48,7 @@ export function SignUpForm({
    * @param {SignupInput} values - User registration credentials
    */
   const onSubmit = (values: SignupInput) => {
+    console.log('FORM SUBMIT', values);
     mutate({ data: values });
   };
 
@@ -70,7 +66,7 @@ export function SignUpForm({
                   <div className="flex flex-col items-center text-center">
                     <h1 className="text-2xl font-bold">Create your account</h1>
                     <p className="text-muted-foreground text-balance">
-                      Sign up to start using Primetrade
+                      Sign up to start using QuizArena
                     </p>
                   </div>
 

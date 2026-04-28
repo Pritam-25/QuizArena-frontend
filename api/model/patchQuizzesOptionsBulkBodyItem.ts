@@ -9,9 +9,9 @@
 export type PatchQuizzesOptionsBulkBodyItem = {
   id: string;
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
+   * @minLength 1
+   * @maxLength 200
+   */
   optionText?: string;
   isCorrect?: boolean;
 };

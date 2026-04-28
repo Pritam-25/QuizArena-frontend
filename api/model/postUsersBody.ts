@@ -7,5 +7,5 @@
  */
 
 export type PostUsersBody = {
-  username?: string;
+  username: string;
 };

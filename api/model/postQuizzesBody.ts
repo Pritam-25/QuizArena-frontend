@@ -8,7 +8,7 @@
 
 export type PostQuizzesBody = {
   /** @minLength 3 */
-  title?: string;
+  title: string;
   description?: string;
   isPublished?: boolean;
 };

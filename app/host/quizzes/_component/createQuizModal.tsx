@@ -41,6 +41,7 @@ export default function CreateQuizModal({
     defaultValues: {
       title: 'Untitled Quiz',
       description: undefined,
+      isPublished: false,
     },
   });
 
@@ -48,7 +49,11 @@ export default function CreateQuizModal({
    * @param {useCreateQuiz} - Custom hook for quiz creation (React Query mutation)
    * - Abstracts API call, success handling (toast + redirect), and error handling
    */
-  const { mutate, isPending } = useCreateQuiz();
+  const { mutate, isPending } = useCreateQuiz({
+    onSuccess: () => {
+      onOpenChange(false);
+    },
+  });
 
   /**
    * Handles form submission

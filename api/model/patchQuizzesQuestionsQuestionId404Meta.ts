@@ -6,4 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesQuestionsQuestionId404Meta = {[key: string]: unknown | null};
+export type PatchQuizzesQuestionsQuestionId404Meta = {
+  [key: string]: unknown | null;
+};
