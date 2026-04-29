@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGetQuizzesAdminId } from '@/api/quiz/quiz';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,11 +18,13 @@ export default function Page() {
 
   // Initialize autosave queue system
   useAutosaveQueueInit();
-  useQueueWorker(quizId);
+  useQueueWorker();
 
   const { data, isLoading, isError } = useGetQuizzesAdminId(quizId);
   const setQuiz = useQuizDraftStore(state => state.setQuiz);
-  const questions = useQuizDraftStore(state => state.questions);
+  const questionIds = useQuizDraftStore(
+    useShallow(state => Object.keys(state.questions))
+  );
   const addQuestionLocal = useQuizDraftStore(state => state.addQuestion);
 
   // Initialize store with quiz data
@@ -73,15 +76,15 @@ export default function Page() {
       </div>
 
       <div className="space-y-6">
-        {Object.values(questions).map(question => (
+        {questionIds.map(questionId => (
           <QuestionEditor
-            key={question.id}
+            key={questionId}
             quizId={quizId}
-            question={question}
+            questionId={questionId}
           />
         ))}
 
-        {Object.keys(questions).length === 0 && (
+        {questionIds.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">

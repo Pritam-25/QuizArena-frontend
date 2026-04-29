@@ -31,12 +31,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  DeleteQuizIdQuizzesQuestionsQuestionId401,
-  DeleteQuizIdQuizzesQuestionsQuestionId403,
-  DeleteQuizIdQuizzesQuestionsQuestionId404,
-  DeleteQuizzesQuestionsQuestionIdOptionsOptionId401,
-  DeleteQuizzesQuestionsQuestionIdOptionsOptionId403,
-  DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
+  DeleteQuizzesOptionsOptionId401,
+  DeleteQuizzesOptionsOptionId403,
+  DeleteQuizzesOptionsOptionId404,
+  DeleteQuizzesQuestionsQuestionId401,
+  DeleteQuizzesQuestionsQuestionId403,
+  DeleteQuizzesQuestionsQuestionId404,
   DeleteQuizzesQuizId401,
   DeleteQuizzesQuizId403,
   DeleteQuizzesQuizId404,
@@ -52,21 +52,11 @@ import type {
   PatchQuizzesOptionsBulk403,
   PatchQuizzesOptionsBulk404,
   PatchQuizzesOptionsBulkBodyItem,
-  PatchQuizzesOptionsOptionId200,
-  PatchQuizzesOptionsOptionId401,
-  PatchQuizzesOptionsOptionId403,
-  PatchQuizzesOptionsOptionId404,
-  PatchQuizzesOptionsOptionIdBody,
   PatchQuizzesQuestionsBulk200,
   PatchQuizzesQuestionsBulk401,
   PatchQuizzesQuestionsBulk403,
   PatchQuizzesQuestionsBulk404,
   PatchQuizzesQuestionsBulkBodyItem,
-  PatchQuizzesQuestionsQuestionId200,
-  PatchQuizzesQuestionsQuestionId401,
-  PatchQuizzesQuestionsQuestionId403,
-  PatchQuizzesQuestionsQuestionId404,
-  PatchQuizzesQuestionsQuestionIdBody,
   PatchQuizzesQuizIdQuestionsQuestionIdReorder200,
   PatchQuizzesQuizIdQuestionsQuestionIdReorderBody,
   PostQuizzes201,
@@ -1619,111 +1609,6 @@ export const usePatchQuizzesQuizIdQuestionsQuestionIdReorder = <
   );
 };
 /**
- * @summary Update a question partially (autosave/draft mode)
- */
-export const getPatchQuizzesQuestionsQuestionIdUrl = (questionId: string) => {
-  return `/api/v1/quizzes/questions/${questionId}`;
-};
-
-export const patchQuizzesQuestionsQuestionId = async (
-  questionId: string,
-  patchQuizzesQuestionsQuestionIdBody: PatchQuizzesQuestionsQuestionIdBody,
-  options?: RequestInit
-): Promise<PatchQuizzesQuestionsQuestionId200> => {
-  return apiClient<PatchQuizzesQuestionsQuestionId200>(
-    getPatchQuizzesQuestionsQuestionIdUrl(questionId),
-    {
-      ...options,
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(patchQuizzesQuestionsQuestionIdBody),
-    }
-  );
-};
-
-export const getPatchQuizzesQuestionsQuestionIdMutationOptions = <
-  TError =
-    | PatchQuizzesQuestionsQuestionId401
-    | PatchQuizzesQuestionsQuestionId403
-    | PatchQuizzesQuestionsQuestionId404,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>,
-    TError,
-    { questionId: string; data: PatchQuizzesQuestionsQuestionIdBody },
-    TContext
-  >;
-  request?: SecondParameter<typeof apiClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>,
-  TError,
-  { questionId: string; data: PatchQuizzesQuestionsQuestionIdBody },
-  TContext
-> => {
-  const mutationKey = ['patchQuizzesQuestionsQuestionId'];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      'mutationKey' in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>,
-    { questionId: string; data: PatchQuizzesQuestionsQuestionIdBody }
-  > = props => {
-    const { questionId, data } = props ?? {};
-
-    return patchQuizzesQuestionsQuestionId(questionId, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PatchQuizzesQuestionsQuestionIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>
->;
-export type PatchQuizzesQuestionsQuestionIdMutationBody =
-  PatchQuizzesQuestionsQuestionIdBody;
-export type PatchQuizzesQuestionsQuestionIdMutationError =
-  | PatchQuizzesQuestionsQuestionId401
-  | PatchQuizzesQuestionsQuestionId403
-  | PatchQuizzesQuestionsQuestionId404;
-
-/**
- * @summary Update a question partially (autosave/draft mode)
- */
-export const usePatchQuizzesQuestionsQuestionId = <
-  TError =
-    | PatchQuizzesQuestionsQuestionId401
-    | PatchQuizzesQuestionsQuestionId403
-    | PatchQuizzesQuestionsQuestionId404,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>,
-      TError,
-      { questionId: string; data: PatchQuizzesQuestionsQuestionIdBody },
-      TContext
-    >;
-    request?: SecondParameter<typeof apiClient>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof patchQuizzesQuestionsQuestionId>>,
-  TError,
-  { questionId: string; data: PatchQuizzesQuestionsQuestionIdBody },
-  TContext
-> => {
-  return useMutation(
-    getPatchQuizzesQuestionsQuestionIdMutationOptions(options),
-    queryClient
-  );
-};
-/**
  * @summary Bulk update questions (autosave optimized)
  */
 export const getPatchQuizzesQuestionsBulkUrl = () => {
@@ -1824,111 +1709,6 @@ export const usePatchQuizzesQuestionsBulk = <
 > => {
   return useMutation(
     getPatchQuizzesQuestionsBulkMutationOptions(options),
-    queryClient
-  );
-};
-/**
- * @summary Update an option partially (autosave/draft mode)
- */
-export const getPatchQuizzesOptionsOptionIdUrl = (optionId: string) => {
-  return `/api/v1/quizzes/options/${optionId}`;
-};
-
-export const patchQuizzesOptionsOptionId = async (
-  optionId: string,
-  patchQuizzesOptionsOptionIdBody: PatchQuizzesOptionsOptionIdBody,
-  options?: RequestInit
-): Promise<PatchQuizzesOptionsOptionId200> => {
-  return apiClient<PatchQuizzesOptionsOptionId200>(
-    getPatchQuizzesOptionsOptionIdUrl(optionId),
-    {
-      ...options,
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(patchQuizzesOptionsOptionIdBody),
-    }
-  );
-};
-
-export const getPatchQuizzesOptionsOptionIdMutationOptions = <
-  TError =
-    | PatchQuizzesOptionsOptionId401
-    | PatchQuizzesOptionsOptionId403
-    | PatchQuizzesOptionsOptionId404,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>,
-    TError,
-    { optionId: string; data: PatchQuizzesOptionsOptionIdBody },
-    TContext
-  >;
-  request?: SecondParameter<typeof apiClient>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>,
-  TError,
-  { optionId: string; data: PatchQuizzesOptionsOptionIdBody },
-  TContext
-> => {
-  const mutationKey = ['patchQuizzesOptionsOptionId'];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      'mutationKey' in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>,
-    { optionId: string; data: PatchQuizzesOptionsOptionIdBody }
-  > = props => {
-    const { optionId, data } = props ?? {};
-
-    return patchQuizzesOptionsOptionId(optionId, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PatchQuizzesOptionsOptionIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>
->;
-export type PatchQuizzesOptionsOptionIdMutationBody =
-  PatchQuizzesOptionsOptionIdBody;
-export type PatchQuizzesOptionsOptionIdMutationError =
-  | PatchQuizzesOptionsOptionId401
-  | PatchQuizzesOptionsOptionId403
-  | PatchQuizzesOptionsOptionId404;
-
-/**
- * @summary Update an option partially (autosave/draft mode)
- */
-export const usePatchQuizzesOptionsOptionId = <
-  TError =
-    | PatchQuizzesOptionsOptionId401
-    | PatchQuizzesOptionsOptionId403
-    | PatchQuizzesOptionsOptionId404,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>,
-      TError,
-      { optionId: string; data: PatchQuizzesOptionsOptionIdBody },
-      TContext
-    >;
-    request?: SecondParameter<typeof apiClient>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof patchQuizzesOptionsOptionId>>,
-  TError,
-  { optionId: string; data: PatchQuizzesOptionsOptionIdBody },
-  TContext
-> => {
-  return useMutation(
-    getPatchQuizzesOptionsOptionIdMutationOptions(options),
     queryClient
   );
 };
@@ -2244,48 +2024,41 @@ export const useDeleteQuizzesQuizId = <
 /**
  * @summary Delete a question by ID
  */
-export const getDeleteQuizIdQuizzesQuestionsQuestionIdUrl = (
-  quizId: string,
-  questionId: string
-) => {
-  return `/api/v1/${quizId}/quizzes/questions/${questionId}`;
+export const getDeleteQuizzesQuestionsQuestionIdUrl = (questionId: string) => {
+  return `/api/v1/quizzes/questions/${questionId}`;
 };
 
-export const deleteQuizIdQuizzesQuestionsQuestionId = async (
-  quizId: string,
+export const deleteQuizzesQuestionsQuestionId = async (
   questionId: string,
   options?: RequestInit
 ): Promise<void> => {
-  return apiClient<void>(
-    getDeleteQuizIdQuizzesQuestionsQuestionIdUrl(quizId, questionId),
-    {
-      ...options,
-      method: 'DELETE',
-    }
-  );
+  return apiClient<void>(getDeleteQuizzesQuestionsQuestionIdUrl(questionId), {
+    ...options,
+    method: 'DELETE',
+  });
 };
 
-export const getDeleteQuizIdQuizzesQuestionsQuestionIdMutationOptions = <
+export const getDeleteQuizzesQuestionsQuestionIdMutationOptions = <
   TError =
-    | DeleteQuizIdQuizzesQuestionsQuestionId401
-    | DeleteQuizIdQuizzesQuestionsQuestionId403
-    | DeleteQuizIdQuizzesQuestionsQuestionId404,
+    | DeleteQuizzesQuestionsQuestionId401
+    | DeleteQuizzesQuestionsQuestionId403
+    | DeleteQuizzesQuestionsQuestionId404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>,
     TError,
-    { quizId: string; questionId: string },
+    { questionId: string },
     TContext
   >;
   request?: SecondParameter<typeof apiClient>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+  Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>,
   TError,
-  { quizId: string; questionId: string },
+  { questionId: string },
   TContext
 > => {
-  const mutationKey = ['deleteQuizIdQuizzesQuestionsQuestionId'];
+  const mutationKey = ['deleteQuizzesQuestionsQuestionId'];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       'mutationKey' in options.mutation &&
@@ -2295,175 +2068,152 @@ export const getDeleteQuizIdQuizzesQuestionsQuestionIdMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
-    { quizId: string; questionId: string }
+    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>,
+    { questionId: string }
   > = props => {
-    const { quizId, questionId } = props ?? {};
+    const { questionId } = props ?? {};
 
-    return deleteQuizIdQuizzesQuestionsQuestionId(
-      quizId,
-      questionId,
-      requestOptions
-    );
+    return deleteQuizzesQuestionsQuestionId(questionId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteQuizIdQuizzesQuestionsQuestionIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>
+export type DeleteQuizzesQuestionsQuestionIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>
 >;
 
-export type DeleteQuizIdQuizzesQuestionsQuestionIdMutationError =
-  | DeleteQuizIdQuizzesQuestionsQuestionId401
-  | DeleteQuizIdQuizzesQuestionsQuestionId403
-  | DeleteQuizIdQuizzesQuestionsQuestionId404;
+export type DeleteQuizzesQuestionsQuestionIdMutationError =
+  | DeleteQuizzesQuestionsQuestionId401
+  | DeleteQuizzesQuestionsQuestionId403
+  | DeleteQuizzesQuestionsQuestionId404;
 
 /**
  * @summary Delete a question by ID
  */
-export const useDeleteQuizIdQuizzesQuestionsQuestionId = <
+export const useDeleteQuizzesQuestionsQuestionId = <
   TError =
-    | DeleteQuizIdQuizzesQuestionsQuestionId401
-    | DeleteQuizIdQuizzesQuestionsQuestionId403
-    | DeleteQuizIdQuizzesQuestionsQuestionId404,
+    | DeleteQuizzesQuestionsQuestionId401
+    | DeleteQuizzesQuestionsQuestionId403
+    | DeleteQuizzesQuestionsQuestionId404,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+      Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>,
       TError,
-      { quizId: string; questionId: string },
+      { questionId: string },
       TContext
     >;
     request?: SecondParameter<typeof apiClient>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+  Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionId>>,
   TError,
-  { quizId: string; questionId: string },
+  { questionId: string },
   TContext
 > => {
   return useMutation(
-    getDeleteQuizIdQuizzesQuestionsQuestionIdMutationOptions(options),
+    getDeleteQuizzesQuestionsQuestionIdMutationOptions(options),
     queryClient
   );
 };
 /**
  * @summary Delete an option by ID
  */
-export const getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdUrl = (
-  questionId: string,
-  optionId: string
-) => {
-  return `/api/v1/quizzes/questions/${questionId}/options/${optionId}`;
+export const getDeleteQuizzesOptionsOptionIdUrl = (optionId: string) => {
+  return `/api/v1/quizzes/options/${optionId}`;
 };
 
-export const deleteQuizzesQuestionsQuestionIdOptionsOptionId = async (
-  questionId: string,
+export const deleteQuizzesOptionsOptionId = async (
   optionId: string,
   options?: RequestInit
 ): Promise<void> => {
-  return apiClient<void>(
-    getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdUrl(questionId, optionId),
-    {
-      ...options,
-      method: 'DELETE',
-    }
-  );
+  return apiClient<void>(getDeleteQuizzesOptionsOptionIdUrl(optionId), {
+    ...options,
+    method: 'DELETE',
+  });
 };
 
-export const getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationOptions =
-  <
-    TError =
-      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
-      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
-      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
-    TContext = unknown,
-  >(options?: {
-    mutation?: UseMutationOptions<
-      Awaited<
-        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
-      >,
-      TError,
-      { questionId: string; optionId: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof apiClient>;
-  }): UseMutationOptions<
-    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>,
+export const getDeleteQuizzesOptionsOptionIdMutationOptions = <
+  TError =
+    | DeleteQuizzesOptionsOptionId401
+    | DeleteQuizzesOptionsOptionId403
+    | DeleteQuizzesOptionsOptionId404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>,
     TError,
-    { questionId: string; optionId: string },
+    { optionId: string },
     TContext
-  > => {
-    const mutationKey = ['deleteQuizzesQuestionsQuestionIdOptionsOptionId'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-      ? options.mutation &&
-        'mutationKey' in options.mutation &&
-        options.mutation.mutationKey
-        ? options
-        : { ...options, mutation: { ...options.mutation, mutationKey } }
-      : { mutation: { mutationKey }, request: undefined };
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>,
+  TError,
+  { optionId: string },
+  TContext
+> => {
+  const mutationKey = ['deleteQuizzesOptionsOptionId'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-    const mutationFn: MutationFunction<
-      Awaited<
-        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
-      >,
-      { questionId: string; optionId: string }
-    > = props => {
-      const { questionId, optionId } = props ?? {};
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>,
+    { optionId: string }
+  > = props => {
+    const { optionId } = props ?? {};
 
-      return deleteQuizzesQuestionsQuestionIdOptionsOptionId(
-        questionId,
-        optionId,
-        requestOptions
-      );
-    };
-
-    return { mutationFn, ...mutationOptions };
+    return deleteQuizzesOptionsOptionId(optionId, requestOptions);
   };
 
-export type DeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>
-  >;
+  return { mutationFn, ...mutationOptions };
+};
 
-export type DeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationError =
-  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
-  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
-  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404;
+export type DeleteQuizzesOptionsOptionIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>
+>;
+
+export type DeleteQuizzesOptionsOptionIdMutationError =
+  | DeleteQuizzesOptionsOptionId401
+  | DeleteQuizzesOptionsOptionId403
+  | DeleteQuizzesOptionsOptionId404;
 
 /**
  * @summary Delete an option by ID
  */
-export const useDeleteQuizzesQuestionsQuestionIdOptionsOptionId = <
+export const useDeleteQuizzesOptionsOptionId = <
   TError =
-    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
-    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
-    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
+    | DeleteQuizzesOptionsOptionId401
+    | DeleteQuizzesOptionsOptionId403
+    | DeleteQuizzesOptionsOptionId404,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<
-        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
-      >,
+      Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>,
       TError,
-      { questionId: string; optionId: string },
+      { optionId: string },
       TContext
     >;
     request?: SecondParameter<typeof apiClient>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>,
+  Awaited<ReturnType<typeof deleteQuizzesOptionsOptionId>>,
   TError,
-  { questionId: string; optionId: string },
+  { optionId: string },
   TContext
 > => {
   return useMutation(
-    getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationOptions(options),
+    getDeleteQuizzesOptionsOptionIdMutationOptions(options),
     queryClient
   );
 };

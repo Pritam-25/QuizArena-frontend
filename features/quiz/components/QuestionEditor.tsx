@@ -1,271 +1,135 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useCallback } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   useQuizDraftStore,
   QuestionType,
-  type QuestionDraft,
 } from '@/features/quiz/store/useQuizDraftStore';
-import { OptionItem } from '@/features/quiz/components/OptionItem';
+import { QuestionHeader } from '@/features/quiz/components/QuestionHeader';
+import { QuestionFields } from '@/features/quiz/components/QuestionFields';
+import { OptionsList } from '@/features/quiz/components/OptionsList';
 import { useAutoSave } from '@/features/quiz/hooks/useAutoSave';
+import { useQuestionAutosaveTrigger } from '@/features/quiz/hooks/useQuestionAutosaveTrigger';
 import { useOptionCorrectLogic } from '@/features/quiz/hooks/useOptionCorrectLogic';
-import { useDeleteQuizzesQuestionsQuestionIdOptionsOptionId } from '@/api/quiz/quiz';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useDeleteQuizzesOptionsOptionId } from '@/api/quiz/quiz';
 import { handleError } from '@/lib/api/handleError';
 
 interface QuestionEditorProps {
   quizId: string;
-  question: QuestionDraft;
+  questionId: string;
 }
-
-const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
-  { value: QuestionType.MCQ, label: 'Multiple Choice' },
-  { value: QuestionType.TRUE_FALSE, label: 'True/False' },
-  { value: QuestionType.MULTI_SELECT, label: 'Multi Select' },
-  { value: QuestionType.FILL_IN_THE_BLANK, label: 'Fill in the Blank' },
-];
 
 /**
  * QuestionEditor
  *
- * Handles editing a single quiz question with:
- * - Question text editing (autosaved)
- * - Type selection (autosaved)
- * - Points and time limit (autosaved)
- * - Option management (autosaved)
+ * Thin shell that wires together action handlers and delegates all
+ * rendering to focused sub-components (QuestionHeader, QuestionFields,
+ * OptionsList). Each sub-component subscribes only to the slice of state
+ * it needs — this component itself holds NO Zustand subscriptions beyond
+ * stable action refs, so it never re-renders due to state changes.
  *
  * Architecture:
- * - Add Question → local only (no backend call)
- * - Edit any field → triggers debounced autosave (1s)
+ * - Add Question  → local only (no backend call)
+ * - Edit any field → triggers debounced autosave (2 s) via useQuestionAutosaveTrigger
  * - Autosave handles CREATE for temp IDs, UPDATE for real IDs
  * - Options are saved together with their parent question
  */
-export function QuestionEditor({ quizId, question }: QuestionEditorProps) {
+export function QuestionEditor({ quizId, questionId }: QuestionEditorProps) {
+  // Only stable action refs — no reactive subscriptions in this shell
   const updateQuestion = useQuizDraftStore(state => state.updateQuestion);
   const addOption = useQuizDraftStore(state => state.addOption);
   const removeOption = useQuizDraftStore(state => state.removeOption);
+
   const { scheduleAutoSave, triggerImmediateSave } = useAutoSave(quizId);
   const { setCorrectOption } = useOptionCorrectLogic();
-  const { mutateAsync: deleteOption } =
-    useDeleteQuizzesQuestionsQuestionIdOptionsOptionId();
+  const { mutateAsync: deleteOption } = useDeleteQuizzesOptionsOptionId();
 
-  const options = Object.values(question.options);
+  // Autosave trigger effects live here — granular selectors + queue guard
+  useQuestionAutosaveTrigger(questionId, scheduleAutoSave);
 
-  /**
-   * Handle correct toggle for an option - autosave handles it via dirty state
-   */
-  const handleOptionCorrectToggle = useCallback(
-    (optionId: string, newIsCorrect: boolean) => {
-      setCorrectOption(question.id, optionId, newIsCorrect);
+  // ─── Handlers ────────────────────────────────────────────────────────────
+
+  const handleQuestionTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateQuestion(questionId, { questionText: e.target.value });
     },
-    [question.id, setCorrectOption]
+    [questionId, updateQuestion]
   );
 
-  // Trigger autosave when question becomes dirty
-  useEffect(() => {
-    if (question.isDirty && !question.isSaving) {
-      scheduleAutoSave(question.id);
-    }
-  }, [question.isDirty, question.isSaving, question.id, scheduleAutoSave]);
+  const handleTypeChange = useCallback(
+    (value: string) => {
+      const newType = Number(value) as QuestionType;
+      updateQuestion(questionId, { type: newType });
+      triggerImmediateSave(questionId);
+    },
+    [questionId, updateQuestion, triggerImmediateSave]
+  );
 
-  // Trigger autosave when any option becomes dirty (separate from question dirty)
-  useEffect(() => {
-    const options = Object.values(question.options);
-    const hasDirtyOption = options.some(opt => opt.isDirty);
-    const hasOptionSaveInFlight = options.some(opt => opt.isSaving);
+  const handlePointsChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateQuestion(questionId, { points: Number(e.target.value) });
+    },
+    [questionId, updateQuestion]
+  );
 
-    if (hasDirtyOption && !hasOptionSaveInFlight && !question.isSaving) {
-      scheduleAutoSave(question.id);
-    }
-  }, [question.options, question.isSaving, question.id, scheduleAutoSave]);
+  const handleTimeLimitChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateQuestion(questionId, { timeLimit: Number(e.target.value) });
+    },
+    [questionId, updateQuestion]
+  );
 
-  /**
-   * Handle question text change - triggers debounced autosave
-   */
-  const handleQuestionTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newText = e.target.value;
-    updateQuestion(question.id, { questionText: newText });
-    // Autosave is triggered via useEffect watching question.isDirty
-  };
-
-  /**
-   * Handle type change - trigger immediate save
-   */
-  const handleTypeChange = (value: string) => {
-    const newType = Number(value) as QuestionType;
-    updateQuestion(question.id, { type: newType });
-    triggerImmediateSave(question.id);
-  };
-
-  /**
-   * Handle points change
-   */
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const points = Number(e.target.value);
-    updateQuestion(question.id, { points });
-  };
-
-  /**
-   * Handle time limit change
-   */
-  const handleTimeLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const timeLimit = Number(e.target.value);
-    updateQuestion(question.id, { timeLimit });
-  };
-
-  /**
-   * Add a new option to the question
-   */
   const handleAddOption = useCallback(() => {
-    addOption(question.id);
-    // Options will be autosaved via the question's dirty state
-  }, [addOption, question.id]);
+    addOption(questionId);
+  }, [addOption, questionId]);
 
-  /**
-   * Delete an option
-   */
+  const handleOptionCorrectToggle = useCallback(
+    (optionId: string, newIsCorrect: boolean) => {
+      setCorrectOption(questionId, optionId, newIsCorrect);
+    },
+    [questionId, setCorrectOption]
+  );
+
   const handleDeleteOption = useCallback(
     async (optionId: string) => {
+      // Temp options: local-only removal, no API call needed
       if (optionId.startsWith('temp_')) {
-        removeOption(question.id, optionId);
+        removeOption(questionId, optionId);
         return;
       }
 
       try {
-        await deleteOption({
-          questionId: question.id,
-          optionId,
-        });
-
-        removeOption(question.id, optionId);
+        await deleteOption({ optionId });
+        // Remove from local store immediately (optimistic update)
+        removeOption(questionId, optionId);
       } catch (error) {
         console.error('Failed to delete option:', error);
         handleError(error);
       }
     },
-    [question.id, removeOption, deleteOption]
+    [questionId, removeOption, deleteOption]
   );
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <span className="text-muted-foreground">Question</span>
-            {question.isDirty && <Badge variant="outline">Unsaved</Badge>}
-            {question.isSaving && <Badge variant="secondary">Saving...</Badge>}
-            {question.error && <Badge variant="destructive">Error</Badge>}
-          </CardTitle>
-        </div>
+        <QuestionHeader questionId={questionId} />
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Question Text */}
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">
-            Question Text
-          </label>
-          <Input
-            value={question.questionText}
-            onChange={handleQuestionTextChange}
-            placeholder="Enter your question"
-          />
-        </div>
-
-        {/* Type, Points, Time Limit */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground">
-              Type
-            </label>
-            <Select
-              value={
-                question.type !== undefined ? String(question.type) : undefined
-              }
-              onValueChange={handleTypeChange}
-            >
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {QUESTION_TYPES.map(type => (
-                    <SelectItem key={type.value} value={String(type.value)}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground">
-              Points
-            </label>
-            <Input
-              type="number"
-              min={1}
-              value={question.points}
-              onChange={handlePointsChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground">
-              Time Limit (seconds)
-            </label>
-            <Input
-              type="number"
-              min={1}
-              value={question.timeLimit}
-              onChange={handleTimeLimitChange}
-            />
-          </div>
-        </div>
-
-        {/* Options */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-muted-foreground">
-              Options
-            </label>
-            <Button variant="ghost" size="sm" onClick={handleAddOption}>
-              Add Option
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            {options.map(option => (
-              <OptionItem
-                key={option.id}
-                questionId={question.id}
-                option={option}
-                questionType={question.type}
-                onDelete={handleDeleteOption}
-                onCorrectToggle={() =>
-                  handleOptionCorrectToggle(option.id, !option.isCorrect)
-                }
-              />
-            ))}
-
-            {options.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">
-                No options yet. Click &quot;Add Option&quot; to create one.
-              </p>
-            )}
-          </div>
-        </div>
+        <QuestionFields
+          questionId={questionId}
+          onTextChange={handleQuestionTextChange}
+          onTypeChange={handleTypeChange}
+          onPointsChange={handlePointsChange}
+          onTimeLimitChange={handleTimeLimitChange}
+        />
+        <OptionsList
+          questionId={questionId}
+          onAdd={handleAddOption}
+          onDelete={handleDeleteOption}
+          onCorrectToggle={handleOptionCorrectToggle}
+        />
       </CardContent>
     </Card>
   );

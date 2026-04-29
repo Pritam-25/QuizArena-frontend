@@ -34,15 +34,17 @@ export function useQueueWorker() {
   const reconcileQuestionId = useQuizDraftStore(
     state => state.reconcileQuestionId
   );
-  const markOptionSaving = useQuizDraftStore(state => state.markOptionSaving);
   const markOptionSaved = useQuizDraftStore(state => state.markOptionSaved);
   const markSaved = useQuizDraftStore(state => state.markSaved);
 
   const processingRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(false);
 
   const executeItem = useCallback(
-    async (item: QueueItem): Promise<void> => {
+    async (item: QueueItem): Promise<string[]> => {
+      const processedItemIds: string[] = [];
+
       // Idempotency guard: skip CREATE if entity already created
       if (item.type === 'CREATE_QUESTION' || item.type === 'CREATE_OPTION') {
         const { isEntityCreated } = useAutosaveQueueStore.getState();
@@ -50,49 +52,89 @@ export function useQueueWorker() {
           console.log(
             `Entity ${item.clientId} already created, skipping ${item.type}`
           );
-          return; // Already created, skip
+          return processedItemIds;
         }
       }
 
       switch (item.type) {
         case 'CREATE_OPTION': {
+          // Batch all pending/processing CREATE_OPTION items for the same question.
+          // Include 'processing' status because the trigger item was already marked as processing.
+          const { queue } = useAutosaveQueueStore.getState();
+          const createOptionItems = queue.filter(
+            q =>
+              q.type === 'CREATE_OPTION' &&
+              q.questionId === item.questionId &&
+              (q.status === 'pending' || q.status === 'processing')
+          );
+
+          const payloads = createOptionItems.map(
+            q => q.payload as { optionText: string; isCorrect: boolean }
+          );
           const res = await createOptions({
             questionId: item.questionId,
-            data: [item.payload],
+            data: payloads,
           });
 
-          if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-            const backendId = res.data[0].id;
-            // Update queue with new entity ID
-            updateEntityId(item.entityId, backendId);
-            reconcileOptionId(item.questionId, item.entityId, backendId);
-            // Clear isSaving and isDirty after successful creation
-            markOptionSaving(item.questionId, item.entityId, false);
-            // Mark entity as created (idempotency guard)
-            markEntityCreated(item.clientId);
+          // createManyAndReturn returns an array of created option records.
+          // Reconcile each temp option ID → real backend ID.
+          if (res.data && Array.isArray(res.data)) {
+            for (let i = 0; i < createOptionItems.length; i++) {
+              const queueItem = createOptionItems[i];
+              const backendId = res.data[i]?.id;
+              if (backendId) {
+                updateEntityId(queueItem.entityId, backendId);
+                reconcileOptionId(
+                  item.questionId,
+                  queueItem.entityId,
+                  backendId
+                );
+                markOptionSaved(item.questionId, backendId);
+                markEntityCreated(queueItem.clientId);
+              }
+              processedItemIds.push(queueItem.id);
+            }
+          } else {
+            // Fallback: if response shape is unexpected, still clean up queue
+            for (const queueItem of createOptionItems) {
+              markEntityCreated(queueItem.clientId);
+              processedItemIds.push(queueItem.id);
+            }
           }
-          break;
+
+          return processedItemIds;
         }
 
         case 'UPDATE_OPTION': {
+          const payload = item.payload as {
+            optionText: string;
+            isCorrect: boolean;
+          };
           await bulkUpdateOptions({
             data: [
               {
                 id: item.entityId,
-                optionText: item.payload.optionText,
-                isCorrect: item.payload.isCorrect,
+                optionText: payload.optionText,
+                isCorrect: payload.isCorrect,
               },
             ],
           });
           // Clear isDirty after successful update
           markOptionSaved(item.questionId, item.entityId);
-          break;
+          processedItemIds.push(item.id);
+          return processedItemIds;
         }
 
         case 'CREATE_QUESTION': {
+          const payload = item.payload as {
+            questionText: string;
+            type: string;
+            points: number;
+            timeLimit: number;
+          };
           const res = await createQuestion({
             quizId: item.quizId,
-            data: item.payload,
+            data: payload,
           });
 
           if (res.data?.id) {
@@ -104,24 +146,32 @@ export function useQueueWorker() {
             markSaved([backendId]);
             // Mark entity as created (idempotency guard)
             markEntityCreated(item.clientId);
+            processedItemIds.push(item.id);
           }
-          break;
+          return processedItemIds;
         }
 
         case 'UPDATE_QUESTION': {
+          const payload = item.payload as {
+            id: string;
+            questionText: string;
+            points: number;
+            timeLimit: number;
+          };
           await bulkUpdateQuestions({
             data: [
               {
                 id: item.entityId,
-                questionText: item.payload.questionText,
-                points: item.payload.points,
-                timeLimit: item.payload.timeLimit,
+                questionText: payload.questionText,
+                points: payload.points,
+                timeLimit: payload.timeLimit,
               },
             ],
           });
-          // Clear isDirty after successful update
-          markSaved([item.entityId]);
-          break;
+          // Clear isDirty on question only, preserve option dirty flags
+          markSaved([item.entityId], { clearOptions: false });
+          processedItemIds.push(item.id);
+          return processedItemIds;
         }
 
         default:
@@ -136,7 +186,6 @@ export function useQueueWorker() {
       updateEntityId,
       reconcileOptionId,
       reconcileQuestionId,
-      markOptionSaving,
       markOptionSaved,
       markSaved,
       markEntityCreated,
@@ -169,12 +218,37 @@ export function useQueueWorker() {
       }
 
       markProcessing(pendingItem.id);
-      await saveItemToIndexedDB(pendingItem);
+      await saveItemToIndexedDB({
+        ...pendingItem,
+        status: 'processing',
+      });
 
       try {
-        await executeItem(pendingItem);
-        markSuccess(pendingItem.id, pendingItem.clientId, pendingItem.type);
-        await deleteItemFromIndexedDB(pendingItem.id);
+        // executeItem returns ALL item IDs it processed (including the trigger item for
+        // batch operations like CREATE_OPTION). We use a fresh queue snapshot here so
+        // we're never working off a stale closure reference.
+        const processedItemIds = await executeItem(pendingItem);
+
+        if (processedItemIds && processedItemIds.length > 0) {
+          // Use a fresh snapshot so we resolve clientId/type for every batched item.
+          const freshQueue = useAutosaveQueueStore.getState().queue;
+          for (const id of processedItemIds) {
+            const batchedItem = freshQueue.find(q => q.id === id);
+            if (batchedItem) {
+              markSuccess(
+                batchedItem.id,
+                batchedItem.clientId,
+                batchedItem.type
+              );
+              await deleteItemFromIndexedDB(id);
+            }
+          }
+        } else {
+          // Fallback: if executeItem returned nothing (non-batch path), clean up the
+          // trigger item directly.
+          markSuccess(pendingItem.id, pendingItem.clientId, pendingItem.type);
+          await deleteItemFromIndexedDB(pendingItem.id);
+        }
       } catch (error: unknown) {
         // Handle 409 Conflict - don't retry, just drop
         const err = error as {
@@ -209,32 +283,26 @@ export function useQueueWorker() {
       }
     } finally {
       processingRef.current = false;
-      // Always schedule next processing, even if no pending item
-      timeoutRef.current = setTimeout(() => {
-        processQueue();
-      }, PROCESSING_DELAY);
+      // Only schedule next processing if still mounted
+      if (isMountedRef.current) {
+        timeoutRef.current = setTimeout(() => {
+          processQueue();
+        }, PROCESSING_DELAY);
+      }
     }
   }, [executeItem]);
-
   // Start queue processor loop on mount
   useEffect(() => {
+    isMountedRef.current = true;
     // Start the queue processor on mount
     if (!processingRef.current) {
       processQueue();
     }
     return () => {
+      isMountedRef.current = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
   }, [processQueue]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 }

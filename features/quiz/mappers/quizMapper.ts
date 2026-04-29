@@ -27,6 +27,7 @@ export function mapQuizToDraft(quiz: GetQuizzesAdminId200Data) {
       options[opt.id] = {
         ...opt,
         isDirty: false,
+        isSaving: false,
       };
     });
 

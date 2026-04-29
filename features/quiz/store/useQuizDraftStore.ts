@@ -6,7 +6,7 @@ export type OptionDraft = {
   optionText: string;
   isCorrect: boolean;
   isDirty: boolean; // Indicates if the option has unsaved changes
-  isSaving?: boolean; // Indicates if the option is currently being saved
+  isSaving: boolean; // Indicates if the option is currently being saved
 };
 
 export enum QuestionType {
@@ -60,7 +60,7 @@ type QuizDraftState = {
   addOption: (questionId: string) => void;
 
   markSaving: (ids: string[]) => void;
-  markSaved: (ids: string[]) => void;
+  markSaved: (ids: string[], options?: { clearOptions?: boolean }) => void;
   markError: (ids: string[]) => void;
   markOptionSaving: (
     questionId: string,
@@ -184,12 +184,14 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
               optionText: 'Option 1',
               isCorrect: false,
               isDirty: true,
+              isSaving: false,
             },
             [opt2]: {
               id: opt2,
               optionText: 'Option 2',
               isCorrect: false,
               isDirty: true,
+              isSaving: false,
             },
           },
           isDirty: true,
@@ -219,6 +221,7 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
                 optionText: '',
                 isCorrect: false,
                 isDirty: true,
+                isSaving: false,
               },
             },
             isDirty: true,
@@ -245,26 +248,31 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
     });
   },
 
-  markSaved: ids => {
+  markSaved: (ids, options?) => {
     set(state => {
       const updated = { ...state.questions };
+      const clearOptions = options?.clearOptions ?? true;
 
       ids.forEach(id => {
         const question = updated[id];
         if (!question) return;
 
-        // Clear dirty flags for all options
-        const clearedOptions: Record<string, OptionDraft> = {};
-        Object.entries(question.options).forEach(([optId, opt]) => {
-          clearedOptions[optId] = {
-            ...opt,
-            isDirty: false,
-          };
-        });
+        let newOptions = question.options;
+        if (clearOptions) {
+          // Clear dirty flags for all options
+          const clearedOptions: Record<string, OptionDraft> = {};
+          Object.entries(question.options).forEach(([optId, opt]) => {
+            clearedOptions[optId] = {
+              ...opt,
+              isDirty: false,
+            };
+          });
+          newOptions = clearedOptions;
+        }
 
         updated[id] = {
           ...question,
-          options: clearedOptions,
+          options: newOptions,
           isDirty: false,
           isSaving: false,
           error: false,
@@ -352,13 +360,18 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       const newQuestions = { ...state.questions };
       delete newQuestions[tempId];
 
-      // Clear dirty and saving flags on all options
+      // Clear dirty flags on all options but PRESERVE isSaving.
+      // Options may still have pending CREATE_OPTION items in the queue at this point.
+      // Resetting isSaving would cause the QuestionEditor's options useEffect to see
+      // hasOptionSaveInFlight=false, re-trigger scheduleAutoSave, and re-queue the same
+      // temp_ options — resulting in a duplicate API call (409 conflict).
       const clearedOptions: Record<string, OptionDraft> = {};
       Object.values(temp.options).forEach(opt => {
         clearedOptions[opt.id] = {
           ...opt,
           isDirty: false,
-          isSaving: false,
+          // Do NOT clear isSaving here — let the option save lifecycle manage it.
+          // isSaving will be cleared by markOptionSaved when reconcileOptionId runs.
         };
       });
 
@@ -389,10 +402,14 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       // Create new options map with reconciled ID
       const newOptions = { ...question.options };
       delete newOptions[tempId];
+      // Preserve user edits made during the in-flight CREATE and clear saving state.
       newOptions[realId] = {
         ...tempOption,
         id: realId,
+        optionText: tempOption.optionText, // explicit: keep any edits typed during API call
+        isCorrect: tempOption.isCorrect,
         isDirty: false,
+        isSaving: false, // clear — markOptionSaved will also do this, belt-and-suspenders
       };
 
       return {

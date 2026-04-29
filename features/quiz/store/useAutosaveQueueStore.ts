@@ -51,7 +51,7 @@ export const useAutosaveQueueStore = create<QueueState>((set, get) => ({
         q =>
           q.clientId === item.clientId &&
           q.type === item.type &&
-          q.status === 'pending'
+          (q.status === 'pending' || q.status === 'processing')
       );
 
       if (existing) {

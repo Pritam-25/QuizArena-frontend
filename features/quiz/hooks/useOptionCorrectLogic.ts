@@ -1,29 +1,27 @@
 import { useCallback } from 'react';
-import {
-  useQuizDraftStore,
-  type OptionDraft,
-} from '../store/useQuizDraftStore';
+import { useQuizDraftStore } from '../store/useQuizDraftStore';
 
 /**
  * useOptionCorrectLogic
  *
  * Handles single-correct-answer constraint for quiz options.
  * When an option is marked correct, all other options in the same question are unset.
+ *
+ * Uses getState() for reading inside the callback instead of subscribing to the
+ * entire questions map — this prevents re-renders from unrelated question/option changes.
  */
 export function useOptionCorrectLogic() {
   const updateOption = useQuizDraftStore(state => state.updateOption);
-  const questions = useQuizDraftStore(state => state.questions);
 
   const setCorrectOption = useCallback(
     (questionId: string, optionId: string, shouldBeCorrect: boolean) => {
-      const question = questions[questionId];
+      // Read fresh state at call-time — no subscription needed
+      const question = useQuizDraftStore.getState().questions[questionId];
       if (!question) return;
 
       const options = question.options;
 
-      const hasTarget = Object.values(options).some(
-        (opt: OptionDraft) => opt.id === optionId
-      );
+      const hasTarget = Object.values(options).some(opt => opt.id === optionId);
       if (!hasTarget) return;
 
       if (!shouldBeCorrect) {
@@ -31,7 +29,7 @@ export function useOptionCorrectLogic() {
         return;
       }
 
-      Object.values(options).forEach((opt: OptionDraft) => {
+      Object.values(options).forEach(opt => {
         if (opt.id !== optionId) {
           updateOption(questionId, opt.id, { isCorrect: false });
         }
@@ -39,7 +37,7 @@ export function useOptionCorrectLogic() {
 
       updateOption(questionId, optionId, { isCorrect: true });
     },
-    [questions, updateOption]
+    [updateOption] // no longer depends on 'questions'
   );
 
   return { setCorrectOption };

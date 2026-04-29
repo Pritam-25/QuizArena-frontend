@@ -5,8 +5,6 @@ import {
   QuestionType,
 } from '../store/useQuizDraftStore';
 import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
-import type { PostQuizzesQuizIdQuestionsBody } from '@/api/model/postQuizzesQuizIdQuestionsBody';
-import type { PatchQuizzesQuestionsBulkBodyItem } from '@/api/model/patchQuizzesQuestionsBulkBodyItem';
 
 const DEBOUNCE_MS = 2000;
 
@@ -40,14 +38,19 @@ export function useAutoSave(quizId: string) {
       const allOptions = Object.values(question.options);
 
       // Split: new options (temp IDs) vs existing options (real IDs)
-      // Only include new options that have content and are not being saved
+      // Only include new options that have content, are not being saved,
+      // and have not already been created on the backend (idempotency guard).
+      const { isEntityCreated } = useAutosaveQueueStore.getState();
       const newOptions = allOptions.filter(
         opt =>
-          opt.id.startsWith('temp_') && opt.optionText.trim() && !opt.isSaving
+          opt.id.startsWith('temp_') &&
+          opt.optionText.trim() &&
+          !opt.isSaving &&
+          !isEntityCreated(opt.id)
       );
 
       const dirtyOptions = allOptions.filter(
-        opt => opt.isDirty && !opt.id.startsWith('temp_')
+        opt => opt.isDirty && !opt.id.startsWith('temp_') && !opt.isSaving // prevent queuing UPDATE while a CREATE is still in-flight
       ) as Array<OptionDraft & { id: string }>;
 
       // Nothing to save
@@ -55,6 +58,10 @@ export function useAutoSave(quizId: string) {
 
       // CREATE new options - queue them
       if (newOptions.length > 0) {
+        console.log(
+          `[queueOptions] Found ${newOptions.length} new options to queue:`,
+          newOptions.map(o => ({ id: o.id, text: o.optionText }))
+        );
         // Mark options as saving before queueing
         newOptions.forEach(opt => {
           markOptionSaving(questionId, opt.id, true);
@@ -77,6 +84,11 @@ export function useAutoSave(quizId: string) {
             createdAt: Date.now(),
           });
         });
+        console.log(
+          `[queueOptions] Queue after adding:`,
+          useAutosaveQueueStore.getState().queue.length,
+          'items'
+        );
       }
 
       // UPDATE existing options - queue them (batch by grouping into single item)
@@ -115,9 +127,9 @@ export function useAutoSave(quizId: string) {
 
       if (isTemp) {
         // CREATE new question - queue it
-        const payload: PostQuizzesQuizIdQuestionsBody = {
-          questionText: question.questionText,
-          type: QuestionType[question.type],
+        const payload = {
+          questionText: question.questionText || '',
+          type: QuestionType[question.type] || 'MCQ',
           points: question.points,
           timeLimit: question.timeLimit,
         };
@@ -140,9 +152,9 @@ export function useAutoSave(quizId: string) {
       } else {
         // UPDATE existing question - queue if dirty
         if (question.isDirty) {
-          const payload: PatchQuizzesQuestionsBulkBodyItem = {
+          const payload = {
             id: questionId,
-            questionText: question.questionText,
+            questionText: question.questionText || '',
             points: question.points,
             timeLimit: question.timeLimit,
           };

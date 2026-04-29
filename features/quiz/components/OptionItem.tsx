@@ -1,53 +1,52 @@
+'use client';
+
+import { memo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CorrectToggle } from './CorrectToggle';
-import {
-  useQuizDraftStore,
-  type OptionDraft,
-  QuestionType,
-} from '../store/useQuizDraftStore';
+import { useQuizDraftStore } from '../store/useQuizDraftStore';
 import { Trash2 } from 'lucide-react';
 
 interface OptionItemProps {
+  optionId: string;
   questionId: string;
-  option: OptionDraft;
-  questionType: QuestionType;
   onDelete: (optionId: string) => void;
-  onCorrectToggle: () => void;
+  onCorrectToggle: (optionId: string, newIsCorrect: boolean) => void;
 }
 
 /**
  * OptionItem
  *
- * Renders a single quiz option with:
- * - Editable option text (marked dirty, saved with question)
- * - Correct answer toggle (calls parent callback for save)
- * - Delete button (TODO: implement)
+ * Fully self-contained option renderer. Subscribes internally to only
+ * its own slice of the store (`questions[questionId].options[optionId]`)
+ * so that editing option A does NOT cause option B to re-render.
+ *
+ * Wrapped in React.memo — because it now only receives stable string IDs
+ * and stable callback refs as props, memo correctly bails out for all
+ * unaffected siblings on every Zustand update.
  */
-export function OptionItem({
+const OptionItemInner = ({
+  optionId,
   questionId,
-  option,
   onDelete,
   onCorrectToggle,
-}: OptionItemProps) {
+}: OptionItemProps) => {
+  const option = useQuizDraftStore(
+    state => state.questions[questionId]?.options[optionId]
+  );
+
   const updateOption = useQuizDraftStore(state => state.updateOption);
 
-  /**
-   * Handle option text change - marks as dirty for autosave
-   */
+  // Option may have been removed from the store (delete path) — render nothing.
+  if (!option) return null;
+
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newText = e.target.value;
-    // Update store immediately (optimistic)
-    // Parent question's dirty state will trigger autosave
-    updateOption(questionId, option.id, { optionText: newText });
+    updateOption(questionId, optionId, { optionText: e.target.value });
   };
 
-  /**
-   * Handle correct toggle - triggers immediate save via parent
-   */
   const handleCorrectToggle = () => {
-    onCorrectToggle();
+    onCorrectToggle(optionId, !option.isCorrect);
   };
 
   return (
@@ -74,7 +73,7 @@ export function OptionItem({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => onDelete(option.id)}
+          onClick={() => onDelete(optionId)}
           aria-label="Delete option"
           className="shrink-0"
         >
@@ -83,4 +82,6 @@ export function OptionItem({
       </CardContent>
     </Card>
   );
-}
+};
+
+export const OptionItem = memo(OptionItemInner);

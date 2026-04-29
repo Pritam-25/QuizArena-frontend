@@ -6,6 +6,28 @@ export type QueueItemType =
   | 'CREATE_QUESTION'
   | 'UPDATE_QUESTION';
 
+/** Payload shapes for each queue item type */
+export type QueueItemPayload =
+  | {
+      // CREATE_OPTION / UPDATE_OPTION
+      optionText: string;
+      isCorrect: boolean;
+    }
+  | {
+      // CREATE_QUESTION
+      questionText: string;
+      type: string;
+      points: number;
+      timeLimit: number;
+    }
+  | {
+      // UPDATE_QUESTION
+      id: string;
+      questionText: string;
+      points: number;
+      timeLimit: number;
+    };
+
 export type QueueItem = {
   id: string; // unique queue id
   type: QueueItemType;
@@ -13,7 +35,7 @@ export type QueueItem = {
   clientId: string; // stable client-generated ID for deduplication (never changes)
   questionId: string;
   quizId: string;
-  payload: any;
+  payload: QueueItemPayload;
   status: 'pending' | 'processing' | 'failed' | 'completed';
   attempts: number;
   createdAt: number;
@@ -53,7 +75,9 @@ export async function loadQueueFromIndexedDB(): Promise<QueueItem[]> {
     const db = await getDB();
     const items = await db.getAll(STORE_NAME);
     // Only load pending/processing items, discard failed ones
-    return items.filter((item: QueueItem) => item.status !== 'completed');
+    return items
+      .filter((item: QueueItem) => item.status !== 'completed')
+      .sort((a, b) => a.createdAt - b.createdAt);
   } catch (error) {
     console.error('Failed to load queue from IndexedDB:', error);
     return [];
