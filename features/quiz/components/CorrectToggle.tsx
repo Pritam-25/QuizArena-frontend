@@ -1,5 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface CorrectToggleProps {
   isCorrect: boolean;
@@ -11,7 +10,7 @@ interface CorrectToggleProps {
  * CorrectToggle
  *
  * Toggle button for marking an option as the correct answer.
- * Uses shadcn/ui Button with theme tokens only.
+ * Uses shadcn/ui RadioGroupItem as a single toggle.
  */
 export function CorrectToggle({
   isCorrect,
@@ -19,19 +18,16 @@ export function CorrectToggle({
   disabled,
 }: CorrectToggleProps) {
   return (
-    <div className="flex items-center gap-2">
-      {isCorrect && <Badge variant="secondary">Correct</Badge>}
-      <Button
-        type="button"
-        variant={isCorrect ? 'default' : 'outline'}
-        size="sm"
-        onClick={onToggle}
-        disabled={disabled}
-        aria-pressed={isCorrect}
+    <RadioGroup
+      value={isCorrect ? 'correct' : 'none'}
+      onValueChange={onToggle}
+      disabled={disabled}
+      className="w-fit"
+    >
+      <RadioGroupItem
+        value="correct"
         aria-label={isCorrect ? 'Mark as incorrect' : 'Mark as correct'}
-      >
-        {isCorrect ? 'Correct' : 'Set Correct'}
-      </Button>
-    </div>
+      />
+    </RadioGroup>
   );
 }

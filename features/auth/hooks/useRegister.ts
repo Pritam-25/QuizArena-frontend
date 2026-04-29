@@ -19,16 +19,12 @@ export function useRegister() {
 
   return usePostAuthRegister({
     mutation: {
-      onMutate: vars => {
-        console.log('MUTATION CALLED', vars);
-      },
+      onMutate: () => {},
       onSuccess: res => {
-        console.log('SUCCESS', res);
         handleSuccess(res);
         router.replace('/');
       },
       onError: err => {
-        console.log('ERROR', err);
         handleError(err);
       },
     },

@@ -22,13 +22,16 @@ export async function apiClient<T>(
     const errPayload = await res.json().catch(() => null);
 
     throw new AppError({
-      message: errPayload?.error.message || res.statusText,
-      statusCode: errPayload?.error.statusCode || res.status,
-      errorCode: errPayload?.error.errorCode || 'UNKNOWN_ERROR',
-      details: errPayload?.error.details,
+      message: errPayload?.error?.message || res.statusText,
+      statusCode: errPayload?.error?.statusCode || res.status,
+      errorCode: errPayload?.error?.errorCode || 'UNKNOWN_ERROR',
+      details: errPayload?.error?.details,
     });
   }
 
-  const json = await res.json();
-  return json as T;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

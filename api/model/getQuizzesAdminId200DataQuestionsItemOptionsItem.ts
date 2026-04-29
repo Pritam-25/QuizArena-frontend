@@ -6,11 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesQuestionsBulkBodyItem = {
+export type GetQuizzesAdminId200DataQuestionsItemOptionsItem = {
   id: string;
-  questionText?: string;
-  /** @minimum 0 */
-  points?: number;
-  /** @minimum 0 */
-  timeLimit?: number;
+  questionId: string;
+  optionText: string;
+  isCorrect: boolean;
 };

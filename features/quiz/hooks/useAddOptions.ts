@@ -1,5 +1,8 @@
 import { useMutationHandler } from '@/lib/api/useMutationHandler';
-import { usePostQuizzesQuestionsQuestionIdOptions } from '@/api/quiz/quiz';
+import {
+  getGetQuizzesIdQueryKey,
+  usePostQuizzesQuestionsQuestionIdOptions,
+} from '@/api/quiz/quiz';
 import { PostQuizzesQuestionsQuestionIdOptions201Data } from '@/api/model';
 import type { PostQuizzesQuestionsQuestionIdOptionsBodyItem } from '@/api/model';
 
@@ -23,6 +26,10 @@ export function useAddOptions() {
     AddOptionsVariables
   >({
     successMessage: 'Options added',
+
+    invalidate: [
+      ({ variables }) => getGetQuizzesIdQueryKey(variables.questionId),
+    ],
   });
 
   return usePostQuizzesQuestionsQuestionIdOptions({

@@ -6,11 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PatchQuizzesQuestionsBulkBodyItem = {
-  id: string;
-  questionText?: string;
-  /** @minimum 0 */
-  points?: number;
-  /** @minimum 0 */
-  timeLimit?: number;
+export type DeleteQuizzesQuizId401Error = {
+  statusCode: number;
+  errorCode: string;
+  message: string;
+  details?: unknown | null;
 };

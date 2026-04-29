@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
-import { apiClient } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import {
 import { OptionItem } from '@/features/quiz/components/OptionItem';
 import { useAutoSave } from '@/features/quiz/hooks/useAutoSave';
 import { useOptionCorrectLogic } from '@/features/quiz/hooks/useOptionCorrectLogic';
+import { useDeleteQuizzesQuestionsQuestionIdOptionsOptionId } from '@/api/quiz/quiz';
 import {
   Select,
   SelectContent,
@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { handleError } from '@/lib/api/handleError';
 
 interface QuestionEditorProps {
   quizId: string;
@@ -52,23 +53,23 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
  */
 export function QuestionEditor({ quizId, question }: QuestionEditorProps) {
   const updateQuestion = useQuizDraftStore(state => state.updateQuestion);
-  const updateOption = useQuizDraftStore(state => state.updateOption);
   const addOption = useQuizDraftStore(state => state.addOption);
   const removeOption = useQuizDraftStore(state => state.removeOption);
   const { scheduleAutoSave, triggerImmediateSave } = useAutoSave(quizId);
   const { setCorrectOption } = useOptionCorrectLogic();
+  const { mutateAsync: deleteOption } =
+    useDeleteQuizzesQuestionsQuestionIdOptionsOptionId();
 
   const options = Object.values(question.options);
 
   /**
-   * Handle correct toggle for an option - triggers immediate save
+   * Handle correct toggle for an option - autosave handles it via dirty state
    */
   const handleOptionCorrectToggle = useCallback(
     (optionId: string, newIsCorrect: boolean) => {
       setCorrectOption(question.id, optionId, newIsCorrect);
-      triggerImmediateSave(question.id);
     },
-    [question.id, setCorrectOption, triggerImmediateSave]
+    [question.id, setCorrectOption]
   );
 
   // Trigger autosave when question becomes dirty
@@ -78,12 +79,23 @@ export function QuestionEditor({ quizId, question }: QuestionEditorProps) {
     }
   }, [question.isDirty, question.isSaving, question.id, scheduleAutoSave]);
 
+  // Trigger autosave when any option becomes dirty (separate from question dirty)
+  useEffect(() => {
+    const hasDirtyOption = Object.values(question.options).some(
+      opt => opt.isDirty
+    );
+    if (hasDirtyOption && !question.isSaving) {
+      scheduleAutoSave(question.id);
+    }
+  }, [question.options, question.isSaving, question.id, scheduleAutoSave]);
+
   /**
-   * Handle question text change
+   * Handle question text change - triggers debounced autosave
    */
   const handleQuestionTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newText = e.target.value;
     updateQuestion(question.id, { questionText: newText });
+    // Autosave is triggered via useEffect watching question.isDirty
   };
 
   /**
@@ -129,13 +141,19 @@ export function QuestionEditor({ quizId, question }: QuestionEditorProps) {
         return;
       }
 
-      await apiClient(`/api/v1/quizzes/options/${optionId}`, {
-        method: 'DELETE',
-      });
+      try {
+        await deleteOption({
+          questionId: question.id,
+          optionId,
+        });
 
-      removeOption(question.id, optionId);
+        removeOption(question.id, optionId);
+      } catch (error) {
+        console.error('Failed to delete option:', error);
+        handleError(error);
+      }
     },
-    [question.id, removeOption]
+    [question.id, removeOption, deleteOption]
   );
 
   return (

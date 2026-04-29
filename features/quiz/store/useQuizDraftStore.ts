@@ -5,6 +5,7 @@ export type OptionDraft = {
   optionText: string;
   isCorrect: boolean;
   isDirty: boolean; // Indicates if the option has unsaved changes
+  isSaving?: boolean; // Indicates if the option is currently being saved
 };
 
 export enum QuestionType {
@@ -60,6 +61,11 @@ type QuizDraftState = {
   markSaving: (ids: string[]) => void;
   markSaved: (ids: string[]) => void;
   markError: (ids: string[]) => void;
+  markOptionSaving: (
+    questionId: string,
+    optionId: string,
+    isSaving: boolean
+  ) => void;
 
   reconcileQuestionId: (tempId: string, realId: string) => void;
 
@@ -116,6 +122,9 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   updateOption: (questionId, optionId, data) => {
     set(state => {
       const question = state.questions[questionId];
+
+      if (!question || !question.options[optionId]) return state;
+
       return {
         questions: {
           ...state.questions,
@@ -194,6 +203,8 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
     set(state => {
       const q = state.questions[questionId];
 
+      if (!q) return state;
+
       return {
         questions: {
           ...state.questions,
@@ -220,7 +231,12 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       const updated = { ...state.questions };
 
       ids.forEach(id => {
-        updated[id].isSaving = true;
+        const question = updated[id];
+        if (!question) return;
+        updated[id] = {
+          ...question,
+          isSaving: true,
+        };
       });
 
       return { questions: updated };
@@ -232,9 +248,25 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       const updated = { ...state.questions };
 
       ids.forEach(id => {
-        updated[id].isDirty = false;
-        updated[id].isSaving = false;
-        updated[id].error = false;
+        const question = updated[id];
+        if (!question) return;
+
+        // Clear dirty flags for all options
+        const clearedOptions: Record<string, OptionDraft> = {};
+        Object.entries(question.options).forEach(([optId, opt]) => {
+          clearedOptions[optId] = {
+            ...opt,
+            isDirty: false,
+          };
+        });
+
+        updated[id] = {
+          ...question,
+          options: clearedOptions,
+          isDirty: false,
+          isSaving: false,
+          error: false,
+        };
       });
 
       return { questions: updated };
@@ -246,11 +278,39 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       const updated = { ...state.questions };
 
       ids.forEach(id => {
-        updated[id].error = true;
-        updated[id].isSaving = false;
+        const question = updated[id];
+        if (!question) return;
+        updated[id] = {
+          ...question,
+          error: true,
+          isSaving: false,
+        };
       });
 
       return { questions: updated };
+    });
+  },
+
+  markOptionSaving: (questionId, optionId, isSaving) => {
+    set(state => {
+      const question = state.questions[questionId];
+      if (!question || !question.options[optionId]) return state;
+
+      return {
+        questions: {
+          ...state.questions,
+          [questionId]: {
+            ...question,
+            options: {
+              ...question.options,
+              [optionId]: {
+                ...question.options[optionId],
+                isSaving,
+              },
+            },
+          },
+        },
+      };
     });
   },
 

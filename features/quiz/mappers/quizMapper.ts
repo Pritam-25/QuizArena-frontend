@@ -1,8 +1,23 @@
-import { GetQuizzesId200Data } from '@/api/model/getQuizzesId200Data';
 import { QuestionDraft, OptionDraft } from '../store/useQuizDraftStore';
 import { QuestionType } from '../store/useQuizDraftStore';
+import { GetQuizzesAdminId200Data } from '@/api/model';
 
-export function mapQuizToDraft(quiz: GetQuizzesId200Data) {
+function toQuestionType(value: string): QuestionType {
+  switch (value) {
+    case 'MCQ':
+      return QuestionType.MCQ;
+    case 'TRUE_FALSE':
+      return QuestionType.TRUE_FALSE;
+    case 'MULTI_SELECT':
+      return QuestionType.MULTI_SELECT;
+    case 'FILL_IN_THE_BLANK':
+      return QuestionType.FILL_IN_THE_BLANK;
+    default:
+      return QuestionType.MCQ;
+  }
+}
+
+export function mapQuizToDraft(quiz: GetQuizzesAdminId200Data) {
   const questions: Record<string, QuestionDraft> = {};
 
   (quiz.questions ?? []).forEach(q => {
@@ -20,7 +35,7 @@ export function mapQuizToDraft(quiz: GetQuizzesId200Data) {
       questionText: q.questionText,
       points: q.points,
       timeLimit: q.timeLimit,
-      type: q.type as unknown as QuestionType,
+      type: toQuestionType(String(q.type)),
       prevOrder: undefined,
       nextOrder: undefined,
 

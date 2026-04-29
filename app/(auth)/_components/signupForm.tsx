@@ -48,7 +48,6 @@ export function SignUpForm({
    * @param {SignupInput} values - User registration credentials
    */
   const onSubmit = (values: SignupInput) => {
-    console.log('FORM SUBMIT', values);
     mutate({ data: values });
   };
 

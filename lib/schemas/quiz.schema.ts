@@ -91,7 +91,7 @@ export const reorderQuestionSchema = z
  * Request body schema for adding a single option.
  */
 export const addOptionsSchema = z.object({
-  optionText: z.string().min(1).max(200).trim(),
+  optionText: z.string().trim().min(1).max(200),
   isCorrect: z.boolean().default(false),
 });
 

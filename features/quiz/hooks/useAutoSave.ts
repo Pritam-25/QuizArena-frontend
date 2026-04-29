@@ -14,7 +14,7 @@ import type { PatchQuizzesOptionsBulkBodyItem } from '@/api/model/patchQuizzesOp
 import type { PostQuizzesQuizIdQuestionsBody } from '@/api/model/postQuizzesQuizIdQuestionsBody';
 import type { PatchQuizzesQuestionsBulkBodyItem } from '@/api/model/patchQuizzesQuestionsBulkBodyItem';
 
-const DEBOUNCE_MS = 1000;
+const DEBOUNCE_MS = 2000;
 
 /**
  * useAutoSave
@@ -27,6 +27,7 @@ export function useAutoSave(quizId: string) {
   const markSaving = useQuizDraftStore(state => state.markSaving);
   const markSaved = useQuizDraftStore(state => state.markSaved);
   const markError = useQuizDraftStore(state => state.markError);
+  const markOptionSaving = useQuizDraftStore(state => state.markOptionSaving);
   const reconcileQuestionId = useQuizDraftStore(
     state => state.reconcileQuestionId
   );
@@ -39,9 +40,13 @@ export function useAutoSave(quizId: string) {
     usePostQuizzesQuestionsQuestionIdOptions();
   const { mutateAsync: bulkUpdateOptions } = usePatchQuizzesOptionsBulk();
 
-  // Track pending saves
-  const pendingQuestionSaves = useRef<Set<string>>(new Set());
+  // Track pending saves - Map holds the in-flight promise to serialize per-question saves
+  const pendingQuestionSaves = useRef<Map<string, Promise<void>>>(new Map());
   const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  // Ref to hold the execute function for recursive calls
+  const executeSaveWithSerializationRef = useRef<
+    ((questionId: string) => Promise<void>) | null
+  >(null);
 
   /**
    * Save options for a question (handles both CREATE new and UPDATE existing)
@@ -54,8 +59,10 @@ export function useAutoSave(quizId: string) {
       const allOptions = Object.values(question.options);
 
       // Split: new options (temp IDs) vs existing options (real IDs)
+      // Only include new options that have content and are not being saved
       const newOptions = allOptions.filter(
-        opt => opt.id.startsWith('temp_') && opt.optionText.trim()
+        opt =>
+          opt.id.startsWith('temp_') && opt.optionText.trim() && !opt.isSaving
       );
 
       const dirtyOptions = allOptions.filter(
@@ -66,8 +73,13 @@ export function useAutoSave(quizId: string) {
       if (newOptions.length === 0 && dirtyOptions.length === 0) return;
 
       try {
-        // CREATE new options
+        // CREATE new options - always send current isCorrect state
         if (newOptions.length > 0) {
+          // Mark options as saving before POST
+          newOptions.forEach(opt => {
+            markOptionSaving(questionId, opt.id, true);
+          });
+
           const res = await createOptions({
             questionId,
             data: newOptions.map(opt => ({
@@ -81,6 +93,8 @@ export function useAutoSave(quizId: string) {
             res.data.forEach((backendOpt, index) => {
               const tempId = newOptions[index].id;
               reconcileOptionId(questionId, tempId, backendOpt.id);
+              // Clear isSaving after reconciliation
+              markOptionSaving(questionId, backendOpt.id, false);
             });
           }
         }
@@ -102,7 +116,7 @@ export function useAutoSave(quizId: string) {
         throw error; // Re-throw to be caught by question save
       }
     },
-    [createOptions, bulkUpdateOptions, reconcileOptionId]
+    [createOptions, bulkUpdateOptions, reconcileOptionId, markOptionSaving]
   );
 
   /**
@@ -117,8 +131,8 @@ export function useAutoSave(quizId: string) {
 
       // Mark as saving
       markSaving([questionId]);
-      pendingQuestionSaves.current.add(questionId);
 
+      let targetQuestionId = questionId;
       try {
         if (isTemp) {
           // CREATE new question
@@ -138,30 +152,31 @@ export function useAutoSave(quizId: string) {
 
           // Reconcile question ID
           reconcileQuestionId(questionId, realQuestionId);
+          targetQuestionId = realQuestionId;
 
           // If question had dirty options, save them too
           await saveOptions(realQuestionId);
         } else {
-          // UPDATE existing question
-          const payload: PatchQuizzesQuestionsBulkBodyItem = {
-            id: questionId,
-            questionText: question.questionText,
-            points: question.points,
-            timeLimit: question.timeLimit,
-          };
+          // UPDATE existing question - only hit question endpoint if question itself is dirty
+          if (question.isDirty) {
+            const payload: PatchQuizzesQuestionsBulkBodyItem = {
+              id: questionId,
+              questionText: question.questionText,
+              points: question.points,
+              timeLimit: question.timeLimit,
+            };
 
-          await bulkUpdateQuestions({ data: [payload] });
+            await bulkUpdateQuestions({ data: [payload] });
+          }
 
-          // If question had dirty options, save them too
+          // Always save dirty options (they have their own isDirty tracking)
           await saveOptions(questionId);
         }
 
-        markSaved([questionId]);
+        markSaved([targetQuestionId]);
       } catch (error) {
         console.error('Failed to save question:', error);
-        markError([questionId]);
-      } finally {
-        pendingQuestionSaves.current.delete(questionId);
+        markError([targetQuestionId]);
       }
     },
     [
@@ -177,6 +192,37 @@ export function useAutoSave(quizId: string) {
   );
 
   /**
+   * Execute a question save with serialization to prevent concurrent saves
+   */
+  const executeSaveWithSerialization = useCallback(
+    async (questionId: string) => {
+      const existingSave = pendingQuestionSaves.current.get(questionId);
+      if (existingSave) {
+        // A save is in-flight - wait for it, then chain this save
+        await existingSave;
+        // After the in-flight save completes, check if there are more queued saves
+        // and process them by re-queuing this request
+        await executeSaveWithSerializationRef.current?.(questionId);
+        return;
+      }
+
+      // No in-flight save - start a new one
+      const savePromise = saveQuestion(questionId).finally(() => {
+        pendingQuestionSaves.current.delete(questionId);
+      });
+
+      pendingQuestionSaves.current.set(questionId, savePromise);
+      await savePromise;
+    },
+    [saveQuestion]
+  );
+
+  // Assign the function to the ref so it can call itself recursively
+  useEffect(() => {
+    executeSaveWithSerializationRef.current = executeSaveWithSerialization;
+  }, [executeSaveWithSerialization]);
+
+  /**
    * Schedule autosave for a question
    */
   const scheduleAutoSave = useCallback(
@@ -189,12 +235,12 @@ export function useAutoSave(quizId: string) {
 
       // Schedule new debounced save
       const timer = setTimeout(() => {
-        saveQuestion(questionId);
+        executeSaveWithSerialization(questionId);
       }, DEBOUNCE_MS);
 
       debounceTimers.current.set(questionId, timer);
     },
-    [saveQuestion]
+    [executeSaveWithSerialization]
   );
 
   /**
@@ -208,15 +254,16 @@ export function useAutoSave(quizId: string) {
         clearTimeout(existingTimer);
       }
 
-      await saveQuestion(questionId);
+      await executeSaveWithSerialization(questionId);
     },
-    [saveQuestion]
+    [executeSaveWithSerialization]
   );
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const timers = debounceTimers.current;
     return () => {
-      debounceTimers.current.forEach(timer => clearTimeout(timer));
+      timers.forEach(timer => clearTimeout(timer));
     };
   }, []);
 

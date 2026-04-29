@@ -1,6 +1,6 @@
 'use client';
-
-import { useGetQuizzesId } from '@/api/quiz/quiz';
+import { useRef } from 'react';
+import { useGetQuizzesAdminId, useGetQuizzesId } from '@/api/quiz/quiz';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,16 +12,19 @@ import { mapQuizToDraft } from '@/features/quiz/mappers/quizMapper';
 export default function Page() {
   const params = useParams<{ quizId: string }>();
   const quizId = params.quizId;
+  const initializedRef = useRef(false);
 
-  const { data, isLoading, isError } = useGetQuizzesId(quizId);
+  const { data, isLoading, isError } = useGetQuizzesAdminId(quizId);
   const setQuiz = useQuizDraftStore(state => state.setQuiz);
   const questions = useQuizDraftStore(state => state.questions);
   const addQuestionLocal = useQuizDraftStore(state => state.addQuestion);
 
   // Initialize store with quiz data
   useEffect(() => {
-    if (data?.data) {
-      setQuiz(mapQuizToDraft(data.data));
+    if (data?.data && !initializedRef.current) {
+      const mapped = mapQuizToDraft(data.data);
+      setQuiz(mapped);
+      initializedRef.current = true;
     }
   }, [data, setQuiz]);
 

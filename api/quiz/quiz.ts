@@ -31,7 +31,20 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DeleteQuizIdQuizzesQuestionsQuestionId401,
+  DeleteQuizIdQuizzesQuestionsQuestionId403,
+  DeleteQuizIdQuizzesQuestionsQuestionId404,
+  DeleteQuizzesQuestionsQuestionIdOptionsOptionId401,
+  DeleteQuizzesQuestionsQuestionIdOptionsOptionId403,
+  DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
+  DeleteQuizzesQuizId401,
+  DeleteQuizzesQuizId403,
+  DeleteQuizzesQuizId404,
   GetQuizzes200,
+  GetQuizzesAdminId200,
+  GetQuizzesAdminId401,
+  GetQuizzesAdminId403,
+  GetQuizzesAdminId404,
   GetQuizzesId200,
   GetQuizzesId404,
   PatchQuizzesOptionsBulk200,
@@ -503,6 +516,398 @@ export const useGetGetQuizzesQueryData = () => {
   return () =>
     queryClient.getQueryData<Awaited<ReturnType<typeof getQuizzes>>>(
       getGetQuizzesQueryKey()
+    );
+};
+
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+export const getGetQuizzesAdminIdUrl = (id: string) => {
+  return `/api/v1/quizzes/admin/${id}`;
+};
+
+export const getQuizzesAdminId = async (
+  id: string,
+  options?: RequestInit
+): Promise<GetQuizzesAdminId200> => {
+  return apiClient<GetQuizzesAdminId200>(getGetQuizzesAdminIdUrl(id), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetQuizzesAdminIdInfiniteQueryKey = (id: string) => {
+  return ['infinite', `/api/v1/quizzes/admin/${id}`] as const;
+};
+
+export const getGetQuizzesAdminIdQueryKey = (id: string) => {
+  return [`/api/v1/quizzes/admin/${id}`] as const;
+};
+
+export const getGetQuizzesAdminIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetQuizzesAdminIdInfiniteQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getQuizzesAdminId>>
+  > = ({ signal }) => getQuizzesAdminId(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    staleTime: 60000,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getQuizzesAdminId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetQuizzesAdminIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getQuizzesAdminId>>
+>;
+export type GetQuizzesAdminIdInfiniteQueryError =
+  | GetQuizzesAdminId401
+  | GetQuizzesAdminId403
+  | GetQuizzesAdminId404;
+
+export function useGetQuizzesAdminIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesAdminId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesAdminId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuizzesAdminIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesAdminId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesAdminId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuizzesAdminIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+
+export function useGetQuizzesAdminIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetQuizzesAdminIdInfiniteQueryOptions(id, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+export const useSetGetQuizzesAdminIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (
+    id: string,
+    updater:
+      | InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>
+      | undefined
+      | ((
+          old:
+            | InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>
+            | undefined
+        ) =>
+          | InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>
+          | undefined)
+  ) => {
+    queryClient.setQueryData(getGetQuizzesAdminIdInfiniteQueryKey(id), updater);
+  };
+};
+
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+export const useGetGetQuizzesAdminIdInfiniteQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string) =>
+    queryClient.getQueryData<
+      InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>
+    >(getGetQuizzesAdminIdInfiniteQueryKey(id));
+};
+
+export const getGetQuizzesAdminIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetQuizzesAdminIdQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getQuizzesAdminId>>
+  > = ({ signal }) => getQuizzesAdminId(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    staleTime: 60000,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getQuizzesAdminId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetQuizzesAdminIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getQuizzesAdminId>>
+>;
+export type GetQuizzesAdminIdQueryError =
+  | GetQuizzesAdminId401
+  | GetQuizzesAdminId403
+  | GetQuizzesAdminId404;
+
+export function useGetQuizzesAdminId<
+  TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesAdminId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesAdminId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuizzesAdminId<
+  TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuizzesAdminId>>,
+          TError,
+          Awaited<ReturnType<typeof getQuizzesAdminId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuizzesAdminId<
+  TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+
+export function useGetQuizzesAdminId<
+  TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
+  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getQuizzesAdminId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetQuizzesAdminIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+export const useSetGetQuizzesAdminIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (
+    id: string,
+    updater:
+      | Awaited<ReturnType<typeof getQuizzesAdminId>>
+      | undefined
+      | ((
+          old: Awaited<ReturnType<typeof getQuizzesAdminId>> | undefined
+        ) => Awaited<ReturnType<typeof getQuizzesAdminId>> | undefined)
+  ) => {
+    queryClient.setQueryData(getGetQuizzesAdminIdQueryKey(id), updater);
+  };
+};
+
+/**
+ * @summary Get quiz by id for admin editing (includes isCorrect field)
+ */
+export const useGetGetQuizzesAdminIdQueryData = () => {
+  const queryClient = useQueryClient();
+  return (id: string) =>
+    queryClient.getQueryData<Awaited<ReturnType<typeof getQuizzesAdminId>>>(
+      getGetQuizzesAdminIdQueryKey(id)
     );
 };
 
@@ -1735,6 +2140,330 @@ export const usePostQuizzesQuizIdPublish = <
 > => {
   return useMutation(
     getPostQuizzesQuizIdPublishMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * @summary Delete a quiz by ID
+ */
+export const getDeleteQuizzesQuizIdUrl = (quizId: string) => {
+  return `/api/v1/quizzes/${quizId}`;
+};
+
+export const deleteQuizzesQuizId = async (
+  quizId: string,
+  options?: RequestInit
+): Promise<void> => {
+  return apiClient<void>(getDeleteQuizzesQuizIdUrl(quizId), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getDeleteQuizzesQuizIdMutationOptions = <
+  TError =
+    | DeleteQuizzesQuizId401
+    | DeleteQuizzesQuizId403
+    | DeleteQuizzesQuizId404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteQuizzesQuizId>>,
+    TError,
+    { quizId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteQuizzesQuizId>>,
+  TError,
+  { quizId: string },
+  TContext
+> => {
+  const mutationKey = ['deleteQuizzesQuizId'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteQuizzesQuizId>>,
+    { quizId: string }
+  > = props => {
+    const { quizId } = props ?? {};
+
+    return deleteQuizzesQuizId(quizId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteQuizzesQuizIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteQuizzesQuizId>>
+>;
+
+export type DeleteQuizzesQuizIdMutationError =
+  | DeleteQuizzesQuizId401
+  | DeleteQuizzesQuizId403
+  | DeleteQuizzesQuizId404;
+
+/**
+ * @summary Delete a quiz by ID
+ */
+export const useDeleteQuizzesQuizId = <
+  TError =
+    | DeleteQuizzesQuizId401
+    | DeleteQuizzesQuizId403
+    | DeleteQuizzesQuizId404,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteQuizzesQuizId>>,
+      TError,
+      { quizId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteQuizzesQuizId>>,
+  TError,
+  { quizId: string },
+  TContext
+> => {
+  return useMutation(
+    getDeleteQuizzesQuizIdMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * @summary Delete a question by ID
+ */
+export const getDeleteQuizIdQuizzesQuestionsQuestionIdUrl = (
+  quizId: string,
+  questionId: string
+) => {
+  return `/api/v1/${quizId}/quizzes/questions/${questionId}`;
+};
+
+export const deleteQuizIdQuizzesQuestionsQuestionId = async (
+  quizId: string,
+  questionId: string,
+  options?: RequestInit
+): Promise<void> => {
+  return apiClient<void>(
+    getDeleteQuizIdQuizzesQuestionsQuestionIdUrl(quizId, questionId),
+    {
+      ...options,
+      method: 'DELETE',
+    }
+  );
+};
+
+export const getDeleteQuizIdQuizzesQuestionsQuestionIdMutationOptions = <
+  TError =
+    | DeleteQuizIdQuizzesQuestionsQuestionId401
+    | DeleteQuizIdQuizzesQuestionsQuestionId403
+    | DeleteQuizIdQuizzesQuestionsQuestionId404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+    TError,
+    { quizId: string; questionId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+  TError,
+  { quizId: string; questionId: string },
+  TContext
+> => {
+  const mutationKey = ['deleteQuizIdQuizzesQuestionsQuestionId'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+    { quizId: string; questionId: string }
+  > = props => {
+    const { quizId, questionId } = props ?? {};
+
+    return deleteQuizIdQuizzesQuestionsQuestionId(
+      quizId,
+      questionId,
+      requestOptions
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteQuizIdQuizzesQuestionsQuestionIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>
+>;
+
+export type DeleteQuizIdQuizzesQuestionsQuestionIdMutationError =
+  | DeleteQuizIdQuizzesQuestionsQuestionId401
+  | DeleteQuizIdQuizzesQuestionsQuestionId403
+  | DeleteQuizIdQuizzesQuestionsQuestionId404;
+
+/**
+ * @summary Delete a question by ID
+ */
+export const useDeleteQuizIdQuizzesQuestionsQuestionId = <
+  TError =
+    | DeleteQuizIdQuizzesQuestionsQuestionId401
+    | DeleteQuizIdQuizzesQuestionsQuestionId403
+    | DeleteQuizIdQuizzesQuestionsQuestionId404,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+      TError,
+      { quizId: string; questionId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteQuizIdQuizzesQuestionsQuestionId>>,
+  TError,
+  { quizId: string; questionId: string },
+  TContext
+> => {
+  return useMutation(
+    getDeleteQuizIdQuizzesQuestionsQuestionIdMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * @summary Delete an option by ID
+ */
+export const getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdUrl = (
+  questionId: string,
+  optionId: string
+) => {
+  return `/api/v1/quizzes/questions/${questionId}/options/${optionId}`;
+};
+
+export const deleteQuizzesQuestionsQuestionIdOptionsOptionId = async (
+  questionId: string,
+  optionId: string,
+  options?: RequestInit
+): Promise<void> => {
+  return apiClient<void>(
+    getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdUrl(questionId, optionId),
+    {
+      ...options,
+      method: 'DELETE',
+    }
+  );
+};
+
+export const getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationOptions =
+  <
+    TError =
+      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
+      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
+      | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
+    TContext = unknown,
+  >(options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
+      >,
+      TError,
+      { questionId: string; optionId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  }): UseMutationOptions<
+    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>,
+    TError,
+    { questionId: string; optionId: string },
+    TContext
+  > => {
+    const mutationKey = ['deleteQuizzesQuestionsQuestionIdOptionsOptionId'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+      ? options.mutation &&
+        'mutationKey' in options.mutation &&
+        options.mutation.mutationKey
+        ? options
+        : { ...options, mutation: { ...options.mutation, mutationKey } }
+      : { mutation: { mutationKey }, request: undefined };
+
+    const mutationFn: MutationFunction<
+      Awaited<
+        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
+      >,
+      { questionId: string; optionId: string }
+    > = props => {
+      const { questionId, optionId } = props ?? {};
+
+      return deleteQuizzesQuestionsQuestionIdOptionsOptionId(
+        questionId,
+        optionId,
+        requestOptions
+      );
+    };
+
+    return { mutationFn, ...mutationOptions };
+  };
+
+export type DeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>
+  >;
+
+export type DeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationError =
+  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
+  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
+  | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404;
+
+/**
+ * @summary Delete an option by ID
+ */
+export const useDeleteQuizzesQuestionsQuestionIdOptionsOptionId = <
+  TError =
+    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId401
+    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId403
+    | DeleteQuizzesQuestionsQuestionIdOptionsOptionId404,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>
+      >,
+      TError,
+      { questionId: string; optionId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteQuizzesQuestionsQuestionIdOptionsOptionId>>,
+  TError,
+  { questionId: string; optionId: string },
+  TContext
+> => {
+  return useMutation(
+    getDeleteQuizzesQuestionsQuestionIdOptionsOptionIdMutationOptions(options),
     queryClient
   );
 };
