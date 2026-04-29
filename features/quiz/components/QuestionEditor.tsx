@@ -99,11 +99,12 @@ export function QuestionEditor({ quizId, questionId }: QuestionEditorProps) {
         return;
       }
 
+      // Optimistically remove from local store immediately
+      removeOption(questionId, optionId);
       try {
         await deleteOption({ optionId });
-        // Remove from local store immediately (optimistic update)
-        removeOption(questionId, optionId);
       } catch (error) {
+        // Optionally: rollback here if needed (requires original option data)
         console.error('Failed to delete option:', error);
         handleError(error);
       }
