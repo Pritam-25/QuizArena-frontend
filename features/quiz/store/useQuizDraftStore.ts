@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useAutosaveQueueStore } from './useAutosaveQueueStore';
 
 export type OptionDraft = {
   id: string;
@@ -66,6 +67,7 @@ type QuizDraftState = {
     optionId: string,
     isSaving: boolean
   ) => void;
+  markOptionSaved: (questionId: string, optionId: string) => void;
 
   reconcileQuestionId: (tempId: string, realId: string) => void;
 
@@ -314,7 +316,35 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
     });
   },
 
+  markOptionSaved: (questionId, optionId) => {
+    set(state => {
+      const question = state.questions[questionId];
+      if (!question || !question.options[optionId]) return state;
+
+      return {
+        questions: {
+          ...state.questions,
+          [questionId]: {
+            ...question,
+            options: {
+              ...question.options,
+              [optionId]: {
+                ...question.options[optionId],
+                isDirty: false,
+                isSaving: false,
+              },
+            },
+          },
+        },
+      };
+    });
+  },
+
   reconcileQuestionId: (tempId: string, realId: string) => {
+    // Update queue entity IDs as well
+    const { updateEntityId } = useAutosaveQueueStore.getState();
+    updateEntityId(tempId, realId);
+
     set(state => {
       const temp = state.questions[tempId];
       if (!temp) return state;
@@ -322,10 +352,22 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
       const newQuestions = { ...state.questions };
       delete newQuestions[tempId];
 
+      // Clear dirty and saving flags on all options
+      const clearedOptions: Record<string, OptionDraft> = {};
+      Object.values(temp.options).forEach(opt => {
+        clearedOptions[opt.id] = {
+          ...opt,
+          isDirty: false,
+          isSaving: false,
+        };
+      });
+
       newQuestions[realId] = {
         ...temp,
         id: realId,
         isDirty: false,
+        isSaving: false,
+        options: clearedOptions,
       };
 
       return { questions: newQuestions };
@@ -333,6 +375,10 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   reconcileOptionId: (questionId, tempId, realId) => {
+    // Update queue entity IDs as well
+    const { updateEntityId } = useAutosaveQueueStore.getState();
+    updateEntityId(tempId, realId);
+
     set(state => {
       const question = state.questions[questionId];
       if (!question) return state;

@@ -81,10 +81,11 @@ export function QuestionEditor({ quizId, question }: QuestionEditorProps) {
 
   // Trigger autosave when any option becomes dirty (separate from question dirty)
   useEffect(() => {
-    const hasDirtyOption = Object.values(question.options).some(
-      opt => opt.isDirty
-    );
-    if (hasDirtyOption && !question.isSaving) {
+    const options = Object.values(question.options);
+    const hasDirtyOption = options.some(opt => opt.isDirty);
+    const hasOptionSaveInFlight = options.some(opt => opt.isSaving);
+
+    if (hasDirtyOption && !hasOptionSaveInFlight && !question.isSaving) {
       scheduleAutoSave(question.id);
     }
   }, [question.options, question.isSaving, question.id, scheduleAutoSave]);

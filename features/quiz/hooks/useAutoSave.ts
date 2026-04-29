@@ -4,13 +4,7 @@ import {
   type OptionDraft,
   QuestionType,
 } from '../store/useQuizDraftStore';
-import {
-  usePatchQuizzesOptionsBulk,
-  usePostQuizzesQuestionsQuestionIdOptions,
-  usePostQuizzesQuizIdQuestions,
-  usePatchQuizzesQuestionsBulk,
-} from '@/api/quiz/quiz';
-import type { PatchQuizzesOptionsBulkBodyItem } from '@/api/model/patchQuizzesOptionsBulkBodyItem';
+import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
 import type { PostQuizzesQuizIdQuestionsBody } from '@/api/model/postQuizzesQuizIdQuestionsBody';
 import type { PatchQuizzesQuestionsBulkBodyItem } from '@/api/model/patchQuizzesQuestionsBulkBodyItem';
 
@@ -20,39 +14,26 @@ const DEBOUNCE_MS = 2000;
  * useAutoSave
  *
  * Handles debounced batch autosave for quiz questions and options.
- * Groups changes by entity and sends bulk updates.
- * Handles temp ID → backend ID reconciliation for both questions and options.
+ * Instead of calling APIs directly, it pushes items to the queue.
+ * The queue worker processes items in order with retry logic.
  */
 export function useAutoSave(quizId: string) {
-  const markSaving = useQuizDraftStore(state => state.markSaving);
-  const markSaved = useQuizDraftStore(state => state.markSaved);
-  const markError = useQuizDraftStore(state => state.markError);
   const markOptionSaving = useQuizDraftStore(state => state.markOptionSaving);
-  const reconcileQuestionId = useQuizDraftStore(
-    state => state.reconcileQuestionId
-  );
-  const reconcileOptionId = useQuizDraftStore(state => state.reconcileOptionId);
 
-  // Mutations
-  const { mutateAsync: createQuestion } = usePostQuizzesQuizIdQuestions();
-  const { mutateAsync: bulkUpdateQuestions } = usePatchQuizzesQuestionsBulk();
-  const { mutateAsync: createOptions } =
-    usePostQuizzesQuestionsQuestionIdOptions();
-  const { mutateAsync: bulkUpdateOptions } = usePatchQuizzesOptionsBulk();
+  const addToQueue = useAutosaveQueueStore(state => state.addToQueue);
 
   // Track pending saves - Map holds the in-flight promise to serialize per-question saves
   const pendingQuestionSaves = useRef<Map<string, Promise<void>>>(new Map());
   const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
-  // Ref to hold the execute function for recursive calls
   const executeSaveWithSerializationRef = useRef<
     ((questionId: string) => Promise<void>) | null
   >(null);
 
   /**
-   * Save options for a question (handles both CREATE new and UPDATE existing)
+   * Queue options for saving (handles both CREATE new and UPDATE existing)
    */
-  const saveOptions = useCallback(
-    async (questionId: string) => {
+  const queueOptions = useCallback(
+    (questionId: string) => {
       const question = useQuizDraftStore.getState().questions[questionId];
       if (!question) return;
 
@@ -72,123 +53,119 @@ export function useAutoSave(quizId: string) {
       // Nothing to save
       if (newOptions.length === 0 && dirtyOptions.length === 0) return;
 
-      try {
-        // CREATE new options - always send current isCorrect state
-        if (newOptions.length > 0) {
-          // Mark options as saving before POST
-          newOptions.forEach(opt => {
-            markOptionSaving(questionId, opt.id, true);
-          });
+      // CREATE new options - queue them
+      if (newOptions.length > 0) {
+        // Mark options as saving before queueing
+        newOptions.forEach(opt => {
+          markOptionSaving(questionId, opt.id, true);
+        });
 
-          const res = await createOptions({
+        newOptions.forEach(opt => {
+          addToQueue({
+            id: crypto.randomUUID(),
+            type: 'CREATE_OPTION',
+            entityId: opt.id,
+            clientId: opt.id, // Use temp ID as stable clientId
             questionId,
-            data: newOptions.map(opt => ({
+            quizId,
+            payload: {
               optionText: opt.optionText,
               isCorrect: opt.isCorrect,
-            })),
+            },
+            status: 'pending',
+            attempts: 0,
+            createdAt: Date.now(),
           });
+        });
+      }
 
-          // Reconcile temp IDs with backend IDs (index-based mapping)
-          if (Array.isArray(res.data)) {
-            res.data.forEach((backendOpt, index) => {
-              const tempId = newOptions[index].id;
-              reconcileOptionId(questionId, tempId, backendOpt.id);
-              // Clear isSaving after reconciliation
-              markOptionSaving(questionId, backendOpt.id, false);
-            });
-          }
-        }
-
-        // UPDATE existing options
-        if (dirtyOptions.length > 0) {
-          const payload: PatchQuizzesOptionsBulkBodyItem[] = dirtyOptions.map(
-            opt => ({
-              id: opt.id,
+      // UPDATE existing options - queue them (batch by grouping into single item)
+      if (dirtyOptions.length > 0) {
+        dirtyOptions.forEach(opt => {
+          addToQueue({
+            id: crypto.randomUUID(),
+            type: 'UPDATE_OPTION',
+            entityId: opt.id,
+            clientId: opt.id, // Use real ID as clientId for existing options
+            questionId,
+            quizId,
+            payload: {
               optionText: opt.optionText,
               isCorrect: opt.isCorrect,
-            })
-          );
-
-          await bulkUpdateOptions({ data: payload });
-        }
-      } catch (error) {
-        console.error('Failed to save options:', error);
-        throw error; // Re-throw to be caught by question save
+            },
+            status: 'pending',
+            attempts: 0,
+            createdAt: Date.now(),
+          });
+        });
       }
     },
-    [createOptions, bulkUpdateOptions, reconcileOptionId, markOptionSaving]
+    [addToQueue, markOptionSaving, quizId]
   );
 
   /**
-   * Save a single question (CREATE or UPDATE)
+   * Queue a single question for saving (CREATE or UPDATE)
    */
-  const saveQuestion = useCallback(
-    async (questionId: string) => {
+  const queueQuestion = useCallback(
+    (questionId: string) => {
       const question = useQuizDraftStore.getState().questions[questionId];
       if (!question) return;
 
       const isTemp = question.id.startsWith('temp_');
 
-      // Mark as saving
-      markSaving([questionId]);
+      if (isTemp) {
+        // CREATE new question - queue it
+        const payload: PostQuizzesQuizIdQuestionsBody = {
+          questionText: question.questionText,
+          type: QuestionType[question.type],
+          points: question.points,
+          timeLimit: question.timeLimit,
+        };
 
-      let targetQuestionId = questionId;
-      try {
-        if (isTemp) {
-          // CREATE new question
-          const payload: PostQuizzesQuizIdQuestionsBody = {
+        addToQueue({
+          id: crypto.randomUUID(),
+          type: 'CREATE_QUESTION',
+          entityId: questionId,
+          clientId: questionId, // Use temp ID as stable clientId
+          questionId,
+          quizId,
+          payload,
+          status: 'pending',
+          attempts: 0,
+          createdAt: Date.now(),
+        });
+
+        // Queue options separately (they'll be processed after question)
+        queueOptions(questionId);
+      } else {
+        // UPDATE existing question - queue if dirty
+        if (question.isDirty) {
+          const payload: PatchQuizzesQuestionsBulkBodyItem = {
+            id: questionId,
             questionText: question.questionText,
-            type: QuestionType[question.type],
             points: question.points,
             timeLimit: question.timeLimit,
           };
 
-          const res = await createQuestion({
+          addToQueue({
+            id: crypto.randomUUID(),
+            type: 'UPDATE_QUESTION',
+            entityId: questionId,
+            clientId: questionId, // Use real ID as clientId for existing questions
+            questionId,
             quizId,
-            data: payload,
+            payload,
+            status: 'pending',
+            attempts: 0,
+            createdAt: Date.now(),
           });
-
-          const realQuestionId = res.data.id;
-
-          // Reconcile question ID
-          reconcileQuestionId(questionId, realQuestionId);
-          targetQuestionId = realQuestionId;
-
-          // If question had dirty options, save them too
-          await saveOptions(realQuestionId);
-        } else {
-          // UPDATE existing question - only hit question endpoint if question itself is dirty
-          if (question.isDirty) {
-            const payload: PatchQuizzesQuestionsBulkBodyItem = {
-              id: questionId,
-              questionText: question.questionText,
-              points: question.points,
-              timeLimit: question.timeLimit,
-            };
-
-            await bulkUpdateQuestions({ data: [payload] });
-          }
-
-          // Always save dirty options (they have their own isDirty tracking)
-          await saveOptions(questionId);
         }
 
-        markSaved([targetQuestionId]);
-      } catch (error) {
-        console.error('Failed to save question:', error);
-        markError([targetQuestionId]);
+        // Always queue dirty options (they have their own isDirty tracking)
+        queueOptions(questionId);
       }
     },
-    [
-      markSaving,
-      markSaved,
-      markError,
-      createQuestion,
-      bulkUpdateQuestions,
-      reconcileQuestionId,
-      quizId,
-      saveOptions,
-    ]
+    [addToQueue, queueOptions, quizId]
   );
 
   /**
@@ -207,14 +184,16 @@ export function useAutoSave(quizId: string) {
       }
 
       // No in-flight save - start a new one
-      const savePromise = saveQuestion(questionId).finally(() => {
+      const savePromise = (async () => {
+        queueQuestion(questionId);
+      })().finally(() => {
         pendingQuestionSaves.current.delete(questionId);
       });
 
       pendingQuestionSaves.current.set(questionId, savePromise);
       await savePromise;
     },
-    [saveQuestion]
+    [queueQuestion]
   );
 
   // Assign the function to the ref so it can call itself recursively

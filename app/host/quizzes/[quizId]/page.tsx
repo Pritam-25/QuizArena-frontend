@@ -1,18 +1,23 @@
 'use client';
-import { useRef } from 'react';
-import { useGetQuizzesAdminId, useGetQuizzesId } from '@/api/quiz/quiz';
+import { useRef, useEffect } from 'react';
+import { useGetQuizzesAdminId } from '@/api/quiz/quiz';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QuestionEditor } from '@/features/quiz/components/QuestionEditor';
 import { useQuizDraftStore } from '@/features/quiz/store/useQuizDraftStore';
-import { useEffect } from 'react';
 import { mapQuizToDraft } from '@/features/quiz/mappers/quizMapper';
+import { useAutosaveQueueInit } from '@/features/quiz/hooks/useAutosaveQueueInit';
+import { useQueueWorker } from '@/features/quiz/hooks/useQueueWorker';
 
 export default function Page() {
   const params = useParams<{ quizId: string }>();
   const quizId = params.quizId;
   const initializedRef = useRef(false);
+
+  // Initialize autosave queue system
+  useAutosaveQueueInit();
+  useQueueWorker(quizId);
 
   const { data, isLoading, isError } = useGetQuizzesAdminId(quizId);
   const setQuiz = useQuizDraftStore(state => state.setQuiz);
