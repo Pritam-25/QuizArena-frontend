@@ -32,12 +32,29 @@ import type {
 
 import type {
   GetSessionsSessionId200,
+  GetSessionsSessionId401,
+  GetSessionsSessionId403,
   GetSessionsSessionId404,
+  GetSessionsSessionId500,
   PostSessions201,
+  PostSessions400,
+  PostSessions401,
+  PostSessions403,
+  PostSessions500,
   PostSessionsBody,
   PostSessionsJoin201,
+  PostSessionsJoin400,
+  PostSessionsJoin401,
+  PostSessionsJoin403,
+  PostSessionsJoin404,
+  PostSessionsJoin500,
   PostSessionsJoinBody,
   PostSessionsSessionIdStart200,
+  PostSessionsSessionIdStart400,
+  PostSessionsSessionIdStart401,
+  PostSessionsSessionIdStart403,
+  PostSessionsSessionIdStart404,
+  PostSessionsSessionIdStart500,
 } from '../model';
 
 import { apiClient } from '../../lib/api/client';
@@ -64,7 +81,11 @@ export const postSessions = async (
 };
 
 export const getPostSessionsMutationOptions = <
-  TError = unknown,
+  TError =
+    | PostSessions400
+    | PostSessions401
+    | PostSessions403
+    | PostSessions500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -105,12 +126,23 @@ export type PostSessionsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postSessions>>
 >;
 export type PostSessionsMutationBody = PostSessionsBody;
-export type PostSessionsMutationError = unknown;
+export type PostSessionsMutationError =
+  | PostSessions400
+  | PostSessions401
+  | PostSessions403
+  | PostSessions500;
 
 /**
  * @summary Create a live session
  */
-export const usePostSessions = <TError = unknown, TContext = unknown>(
+export const usePostSessions = <
+  TError =
+    | PostSessions400
+    | PostSessions401
+    | PostSessions403
+    | PostSessions500,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postSessions>>,
@@ -159,7 +191,11 @@ export const getGetSessionsSessionIdQueryKey = (sessionId: string) => {
 
 export const getGetSessionsSessionIdInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -200,11 +236,19 @@ export const getGetSessionsSessionIdInfiniteQueryOptions = <
 export type GetSessionsSessionIdInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getSessionsSessionId>>
 >;
-export type GetSessionsSessionIdInfiniteQueryError = GetSessionsSessionId404;
+export type GetSessionsSessionIdInfiniteQueryError =
+  | GetSessionsSessionId401
+  | GetSessionsSessionId403
+  | GetSessionsSessionId404
+  | GetSessionsSessionId500;
 
 export function useGetSessionsSessionIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options: {
@@ -231,7 +275,11 @@ export function useGetSessionsSessionIdInfinite<
 };
 export function useGetSessionsSessionIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -258,7 +306,11 @@ export function useGetSessionsSessionIdInfinite<
 };
 export function useGetSessionsSessionIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -281,7 +333,11 @@ export function useGetSessionsSessionIdInfinite<
 
 export function useGetSessionsSessionIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getSessionsSessionId>>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -351,7 +407,11 @@ export const useGetGetSessionsSessionIdInfiniteQueryData = () => {
 
 export const getGetSessionsSessionIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getSessionsSessionId>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -391,11 +451,19 @@ export const getGetSessionsSessionIdQueryOptions = <
 export type GetSessionsSessionIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getSessionsSessionId>>
 >;
-export type GetSessionsSessionIdQueryError = GetSessionsSessionId404;
+export type GetSessionsSessionIdQueryError =
+  | GetSessionsSessionId401
+  | GetSessionsSessionId403
+  | GetSessionsSessionId404
+  | GetSessionsSessionId500;
 
 export function useGetSessionsSessionId<
   TData = Awaited<ReturnType<typeof getSessionsSessionId>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options: {
@@ -422,7 +490,11 @@ export function useGetSessionsSessionId<
 };
 export function useGetSessionsSessionId<
   TData = Awaited<ReturnType<typeof getSessionsSessionId>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -449,7 +521,11 @@ export function useGetSessionsSessionId<
 };
 export function useGetSessionsSessionId<
   TData = Awaited<ReturnType<typeof getSessionsSessionId>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -472,7 +548,11 @@ export function useGetSessionsSessionId<
 
 export function useGetSessionsSessionId<
   TData = Awaited<ReturnType<typeof getSessionsSessionId>>,
-  TError = GetSessionsSessionId404,
+  TError =
+    | GetSessionsSessionId401
+    | GetSessionsSessionId403
+    | GetSessionsSessionId404
+    | GetSessionsSessionId500,
 >(
   sessionId: string,
   options?: {
@@ -551,7 +631,12 @@ export const postSessionsJoin = async (
 };
 
 export const getPostSessionsJoinMutationOptions = <
-  TError = unknown,
+  TError =
+    | PostSessionsJoin400
+    | PostSessionsJoin401
+    | PostSessionsJoin403
+    | PostSessionsJoin404
+    | PostSessionsJoin500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -592,12 +677,25 @@ export type PostSessionsJoinMutationResult = NonNullable<
   Awaited<ReturnType<typeof postSessionsJoin>>
 >;
 export type PostSessionsJoinMutationBody = PostSessionsJoinBody;
-export type PostSessionsJoinMutationError = unknown;
+export type PostSessionsJoinMutationError =
+  | PostSessionsJoin400
+  | PostSessionsJoin401
+  | PostSessionsJoin403
+  | PostSessionsJoin404
+  | PostSessionsJoin500;
 
 /**
  * @summary Join a session by join code
  */
-export const usePostSessionsJoin = <TError = unknown, TContext = unknown>(
+export const usePostSessionsJoin = <
+  TError =
+    | PostSessionsJoin400
+    | PostSessionsJoin401
+    | PostSessionsJoin403
+    | PostSessionsJoin404
+    | PostSessionsJoin500,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postSessionsJoin>>,
@@ -637,7 +735,12 @@ export const postSessionsSessionIdStart = async (
 };
 
 export const getPostSessionsSessionIdStartMutationOptions = <
-  TError = unknown,
+  TError =
+    | PostSessionsSessionIdStart400
+    | PostSessionsSessionIdStart401
+    | PostSessionsSessionIdStart403
+    | PostSessionsSessionIdStart404
+    | PostSessionsSessionIdStart500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -678,13 +781,23 @@ export type PostSessionsSessionIdStartMutationResult = NonNullable<
   Awaited<ReturnType<typeof postSessionsSessionIdStart>>
 >;
 
-export type PostSessionsSessionIdStartMutationError = unknown;
+export type PostSessionsSessionIdStartMutationError =
+  | PostSessionsSessionIdStart400
+  | PostSessionsSessionIdStart401
+  | PostSessionsSessionIdStart403
+  | PostSessionsSessionIdStart404
+  | PostSessionsSessionIdStart500;
 
 /**
  * @summary Start session
  */
 export const usePostSessionsSessionIdStart = <
-  TError = unknown,
+  TError =
+    | PostSessionsSessionIdStart400
+    | PostSessionsSessionIdStart401
+    | PostSessionsSessionIdStart403
+    | PostSessionsSessionIdStart404
+    | PostSessionsSessionIdStart500,
   TContext = unknown,
 >(
   options?: {

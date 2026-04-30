@@ -109,24 +109,63 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   updateQuestion: (id, data) => {
-    set(state => ({
-      questions: {
-        ...state.questions,
-        [id]: {
-          ...state.questions[id],
-          ...data,
-          isDirty: true,
+    set(state => {
+      // [update-question] Numbering starts from 1 for each type
+      if (data.questionText !== undefined) {
+        console.log(
+          `1. [update-question][text-change] Question ${id} text changed to:`,
+          data.questionText
+        );
+      }
+      if (data.points !== undefined) {
+        console.log(
+          `2. [update-question][point-change] Question ${id} points changed to:`,
+          data.points
+        );
+      }
+      if (data.timeLimit !== undefined) {
+        console.log(
+          `3. [update-question][time-limit-change] Question ${id} timeLimit changed to:`,
+          data.timeLimit
+        );
+      }
+      if (data.type !== undefined) {
+        console.log(
+          `4. [update-question][type-change] Question ${id} type changed to:`,
+          data.type
+        );
+      }
+      return {
+        questions: {
+          ...state.questions,
+          [id]: {
+            ...state.questions[id],
+            ...data,
+            isDirty: true,
+          },
         },
-      },
-    }));
+      };
+    });
   },
 
   updateOption: (questionId, optionId, data) => {
     set(state => {
       const question = state.questions[questionId];
-
       if (!question || !question.options[optionId]) return state;
-
+      // [update-option] Numbering starts from 1 for each type
+      if (data.optionText !== undefined) {
+        console.log(
+          `1. [update-option][text-change] Option ${optionId} in Question ${questionId} text changed to:`,
+          data.optionText
+        );
+      }
+      if (data.isCorrect !== undefined) {
+        console.log(
+          `2. [update-option][toggle-change] Option ${optionId} in Question ${questionId} isCorrect changed to:`,
+          data.isCorrect
+        );
+      }
+      // Option type/points/timeLimit are not direct fields on OptionDraft, but if you add them, log here
       return {
         questions: {
           ...state.questions,
@@ -147,12 +186,24 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   removeOption: (questionId, optionId) => {
+    console.log('[removeOption] Removing option:', { questionId, optionId });
     set(state => {
       const question = state.questions[questionId];
-      if (!question || !question.options[optionId]) return state;
+      if (!question || !question.options[optionId]) {
+        console.log('[removeOption] Option not found, skipping:', {
+          questionId,
+          optionId,
+        });
+        return state;
+      }
 
       const nextOptions = { ...question.options };
       delete nextOptions[optionId];
+
+      console.log(
+        '[removeOption] Option removed, new options count:',
+        Object.keys(nextOptions).length
+      );
 
       return {
         questions: {
@@ -169,6 +220,10 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   addQuestion: (questionId: string) => {
     const opt1 = `temp_${crypto.randomUUID()}`;
     const opt2 = `temp_${crypto.randomUUID()}`;
+    // [create-question] Numbering starts from 1 for create
+    console.log(
+      `1. [create-question] Created new question with id: ${questionId}`
+    );
     set(state => ({
       questions: {
         ...state.questions,
@@ -203,12 +258,18 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
   addOption: questionId => {
     const id = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    // Generate unique default text to avoid backend conflict on duplicate optionText
+    const q = useQuizDraftStore.getState().questions[questionId];
+    const optionCount = q ? Object.keys(q.options).length + 1 : 1;
+    const defaultText = `Option ${optionCount}`;
 
+    // [create-option] Numbering starts from 1 for create
+    console.log(
+      `1. [create-option] Created new option with id: ${id} for question: ${questionId}`
+    );
     set(state => {
       const q = state.questions[questionId];
-
       if (!q) return state;
-
       return {
         questions: {
           ...state.questions,
@@ -218,7 +279,7 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
               ...q.options,
               [id]: {
                 id,
-                optionText: '',
+                optionText: defaultText, // Unique default text (Option 1, Option 2, etc.)
                 isCorrect: false,
                 isDirty: true,
                 isSaving: false,
@@ -232,6 +293,7 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   markSaving: ids => {
+    console.log('[markSaving] Marking questions as saving:', ids);
     set(state => {
       const updated = { ...state.questions };
 
@@ -249,6 +311,12 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   markSaved: (ids, options?) => {
+    console.log(
+      '[markSaved] Marking questions as saved:',
+      ids,
+      'Options:',
+      options
+    );
     set(state => {
       const updated = { ...state.questions };
       const clearOptions = options?.clearOptions ?? true;
@@ -284,6 +352,7 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   markError: ids => {
+    console.log('[markError] Marking questions as error:', ids);
     set(state => {
       const updated = { ...state.questions };
 
@@ -302,6 +371,11 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   markOptionSaving: (questionId, optionId, isSaving) => {
+    console.log('[markOptionSaving] Marking option as saving:', {
+      questionId,
+      optionId,
+      isSaving,
+    });
     set(state => {
       const question = state.questions[questionId];
       if (!question || !question.options[optionId]) return state;
@@ -325,6 +399,10 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   markOptionSaved: (questionId, optionId) => {
+    console.log('[markOptionSaved] Marking option as saved:', {
+      questionId,
+      optionId,
+    });
     set(state => {
       const question = state.questions[questionId];
       if (!question || !question.options[optionId]) return state;
@@ -349,6 +427,10 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   reconcileQuestionId: (tempId: string, realId: string) => {
+    console.log('[reconcileQuestionId] Reconciling question ID:', {
+      tempId,
+      realId,
+    });
     // Update queue entity IDs as well
     const { updateEntityId } = useAutosaveQueueStore.getState();
     updateEntityId(tempId, realId);
@@ -388,6 +470,11 @@ export const useQuizDraftStore = create<QuizDraftState>(set => ({
   },
 
   reconcileOptionId: (questionId, tempId, realId) => {
+    console.log('[reconcileOptionId] Reconciling option ID:', {
+      questionId,
+      tempId,
+      realId,
+    });
     // Update queue entity IDs as well
     const { updateEntityId } = useAutosaveQueueStore.getState();
     updateEntityId(tempId, realId);

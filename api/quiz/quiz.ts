@@ -34,47 +34,83 @@ import type {
   DeleteQuizzesOptionsOptionId401,
   DeleteQuizzesOptionsOptionId403,
   DeleteQuizzesOptionsOptionId404,
+  DeleteQuizzesOptionsOptionId500,
   DeleteQuizzesQuestionsQuestionId401,
   DeleteQuizzesQuestionsQuestionId403,
   DeleteQuizzesQuestionsQuestionId404,
+  DeleteQuizzesQuestionsQuestionId500,
   DeleteQuizzesQuizId401,
   DeleteQuizzesQuizId403,
   DeleteQuizzesQuizId404,
+  DeleteQuizzesQuizId500,
   GetQuizzes200,
+  GetQuizzes401,
+  GetQuizzes403,
+  GetQuizzes500,
   GetQuizzesAdminId200,
   GetQuizzesAdminId401,
   GetQuizzesAdminId403,
   GetQuizzesAdminId404,
+  GetQuizzesAdminId500,
   GetQuizzesId200,
+  GetQuizzesId401,
+  GetQuizzesId403,
   GetQuizzesId404,
+  GetQuizzesId500,
   PatchQuizzesOptionsBulk200,
+  PatchQuizzesOptionsBulk400,
   PatchQuizzesOptionsBulk401,
   PatchQuizzesOptionsBulk403,
   PatchQuizzesOptionsBulk404,
+  PatchQuizzesOptionsBulk409,
+  PatchQuizzesOptionsBulk500,
   PatchQuizzesOptionsBulkBodyItem,
   PatchQuizzesQuestionsBulk200,
+  PatchQuizzesQuestionsBulk400,
   PatchQuizzesQuestionsBulk401,
   PatchQuizzesQuestionsBulk403,
   PatchQuizzesQuestionsBulk404,
+  PatchQuizzesQuestionsBulk409,
+  PatchQuizzesQuestionsBulk500,
   PatchQuizzesQuestionsBulkBodyItem,
   PatchQuizzesQuizIdQuestionsQuestionIdReorder200,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder400,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder401,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder403,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder404,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder409,
+  PatchQuizzesQuizIdQuestionsQuestionIdReorder500,
   PatchQuizzesQuizIdQuestionsQuestionIdReorderBody,
   PostQuizzes201,
+  PostQuizzes400,
   PostQuizzes401,
+  PostQuizzes403,
+  PostQuizzes409,
+  PostQuizzes500,
   PostQuizzesBody,
   PostQuizzesQuestionsQuestionIdOptions201,
+  PostQuizzesQuestionsQuestionIdOptions400,
   PostQuizzesQuestionsQuestionIdOptions401,
   PostQuizzesQuestionsQuestionIdOptions403,
   PostQuizzesQuestionsQuestionIdOptions404,
+  PostQuizzesQuestionsQuestionIdOptions409,
+  PostQuizzesQuestionsQuestionIdOptions500,
   PostQuizzesQuestionsQuestionIdOptionsBodyItem,
   PostQuizzesQuizIdPublish200,
   PostQuizzesQuizIdPublish400,
   PostQuizzesQuizIdPublish401,
   PostQuizzesQuizIdPublish403,
   PostQuizzesQuizIdPublish404,
+  PostQuizzesQuizIdPublish409,
+  PostQuizzesQuizIdPublish500,
   PostQuizzesQuizIdPublishBody,
   PostQuizzesQuizIdQuestions201,
+  PostQuizzesQuizIdQuestions400,
   PostQuizzesQuizIdQuestions401,
+  PostQuizzesQuizIdQuestions403,
+  PostQuizzesQuizIdQuestions404,
+  PostQuizzesQuizIdQuestions409,
+  PostQuizzesQuizIdQuestions500,
   PostQuizzesQuizIdQuestionsBody,
 } from '../model';
 
@@ -102,7 +138,12 @@ export const postQuizzes = async (
 };
 
 export const getPostQuizzesMutationOptions = <
-  TError = PostQuizzes401,
+  TError =
+    | PostQuizzes400
+    | PostQuizzes401
+    | PostQuizzes403
+    | PostQuizzes409
+    | PostQuizzes500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -143,12 +184,25 @@ export type PostQuizzesMutationResult = NonNullable<
   Awaited<ReturnType<typeof postQuizzes>>
 >;
 export type PostQuizzesMutationBody = PostQuizzesBody;
-export type PostQuizzesMutationError = PostQuizzes401;
+export type PostQuizzesMutationError =
+  | PostQuizzes400
+  | PostQuizzes401
+  | PostQuizzes403
+  | PostQuizzes409
+  | PostQuizzes500;
 
 /**
  * @summary Create a quiz
  */
-export const usePostQuizzes = <TError = PostQuizzes401, TContext = unknown>(
+export const usePostQuizzes = <
+  TError =
+    | PostQuizzes400
+    | PostQuizzes401
+    | PostQuizzes403
+    | PostQuizzes409
+    | PostQuizzes500,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postQuizzes>>,
@@ -193,7 +247,7 @@ export const getGetQuizzesQueryKey = () => {
 
 export const getGetQuizzesInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(options?: {
   query?: Partial<
     UseInfiniteQueryOptions<
@@ -227,11 +281,14 @@ export const getGetQuizzesInfiniteQueryOptions = <
 export type GetQuizzesInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getQuizzes>>
 >;
-export type GetQuizzesInfiniteQueryError = unknown;
+export type GetQuizzesInfiniteQueryError =
+  | GetQuizzes401
+  | GetQuizzes403
+  | GetQuizzes500;
 
 export function useGetQuizzesInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options: {
     query: Partial<
@@ -257,7 +314,7 @@ export function useGetQuizzesInfinite<
 };
 export function useGetQuizzesInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -283,7 +340,7 @@ export function useGetQuizzesInfinite<
 };
 export function useGetQuizzesInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -305,7 +362,7 @@ export function useGetQuizzesInfinite<
 
 export function useGetQuizzesInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzes>>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -363,7 +420,7 @@ export const useGetGetQuizzesInfiniteQueryData = () => {
 
 export const getGetQuizzesQueryOptions = <
   TData = Awaited<ReturnType<typeof getQuizzes>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getQuizzes>>, TError, TData>
@@ -393,11 +450,14 @@ export const getGetQuizzesQueryOptions = <
 export type GetQuizzesQueryResult = NonNullable<
   Awaited<ReturnType<typeof getQuizzes>>
 >;
-export type GetQuizzesQueryError = unknown;
+export type GetQuizzesQueryError =
+  | GetQuizzes401
+  | GetQuizzes403
+  | GetQuizzes500;
 
 export function useGetQuizzes<
   TData = Awaited<ReturnType<typeof getQuizzes>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options: {
     query: Partial<
@@ -419,7 +479,7 @@ export function useGetQuizzes<
 };
 export function useGetQuizzes<
   TData = Awaited<ReturnType<typeof getQuizzes>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -441,7 +501,7 @@ export function useGetQuizzes<
 };
 export function useGetQuizzes<
   TData = Awaited<ReturnType<typeof getQuizzes>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -459,7 +519,7 @@ export function useGetQuizzes<
 
 export function useGetQuizzes<
   TData = Awaited<ReturnType<typeof getQuizzes>>,
-  TError = unknown,
+  TError = GetQuizzes401 | GetQuizzes403 | GetQuizzes500,
 >(
   options?: {
     query?: Partial<
@@ -536,7 +596,11 @@ export const getGetQuizzesAdminIdQueryKey = (id: string) => {
 
 export const getGetQuizzesAdminIdInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -578,11 +642,16 @@ export type GetQuizzesAdminIdInfiniteQueryResult = NonNullable<
 export type GetQuizzesAdminIdInfiniteQueryError =
   | GetQuizzesAdminId401
   | GetQuizzesAdminId403
-  | GetQuizzesAdminId404;
+  | GetQuizzesAdminId404
+  | GetQuizzesAdminId500;
 
 export function useGetQuizzesAdminIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options: {
@@ -609,7 +678,11 @@ export function useGetQuizzesAdminIdInfinite<
 };
 export function useGetQuizzesAdminIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -636,7 +709,11 @@ export function useGetQuizzesAdminIdInfinite<
 };
 export function useGetQuizzesAdminIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -659,7 +736,11 @@ export function useGetQuizzesAdminIdInfinite<
 
 export function useGetQuizzesAdminIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesAdminId>>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -723,7 +804,11 @@ export const useGetGetQuizzesAdminIdInfiniteQueryData = () => {
 
 export const getGetQuizzesAdminIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -764,11 +849,16 @@ export type GetQuizzesAdminIdQueryResult = NonNullable<
 export type GetQuizzesAdminIdQueryError =
   | GetQuizzesAdminId401
   | GetQuizzesAdminId403
-  | GetQuizzesAdminId404;
+  | GetQuizzesAdminId404
+  | GetQuizzesAdminId500;
 
 export function useGetQuizzesAdminId<
   TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options: {
@@ -795,7 +885,11 @@ export function useGetQuizzesAdminId<
 };
 export function useGetQuizzesAdminId<
   TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -822,7 +916,11 @@ export function useGetQuizzesAdminId<
 };
 export function useGetQuizzesAdminId<
   TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -845,7 +943,11 @@ export function useGetQuizzesAdminId<
 
 export function useGetQuizzesAdminId<
   TData = Awaited<ReturnType<typeof getQuizzesAdminId>>,
-  TError = GetQuizzesAdminId401 | GetQuizzesAdminId403 | GetQuizzesAdminId404,
+  TError =
+    | GetQuizzesAdminId401
+    | GetQuizzesAdminId403
+    | GetQuizzesAdminId404
+    | GetQuizzesAdminId500,
 >(
   id: string,
   options?: {
@@ -928,7 +1030,11 @@ export const getGetQuizzesIdQueryKey = (id: string) => {
 
 export const getGetQuizzesIdInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -967,11 +1073,19 @@ export const getGetQuizzesIdInfiniteQueryOptions = <
 export type GetQuizzesIdInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getQuizzesId>>
 >;
-export type GetQuizzesIdInfiniteQueryError = GetQuizzesId404;
+export type GetQuizzesIdInfiniteQueryError =
+  | GetQuizzesId401
+  | GetQuizzesId403
+  | GetQuizzesId404
+  | GetQuizzesId500;
 
 export function useGetQuizzesIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options: {
@@ -998,7 +1112,11 @@ export function useGetQuizzesIdInfinite<
 };
 export function useGetQuizzesIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1025,7 +1143,11 @@ export function useGetQuizzesIdInfinite<
 };
 export function useGetQuizzesIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1048,7 +1170,11 @@ export function useGetQuizzesIdInfinite<
 
 export function useGetQuizzesIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getQuizzesId>>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1110,7 +1236,11 @@ export const useGetGetQuizzesIdInfiniteQueryData = () => {
 
 export const getGetQuizzesIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getQuizzesId>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1144,11 +1274,19 @@ export const getGetQuizzesIdQueryOptions = <
 export type GetQuizzesIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getQuizzesId>>
 >;
-export type GetQuizzesIdQueryError = GetQuizzesId404;
+export type GetQuizzesIdQueryError =
+  | GetQuizzesId401
+  | GetQuizzesId403
+  | GetQuizzesId404
+  | GetQuizzesId500;
 
 export function useGetQuizzesId<
   TData = Awaited<ReturnType<typeof getQuizzesId>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options: {
@@ -1171,7 +1309,11 @@ export function useGetQuizzesId<
 };
 export function useGetQuizzesId<
   TData = Awaited<ReturnType<typeof getQuizzesId>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1194,7 +1336,11 @@ export function useGetQuizzesId<
 };
 export function useGetQuizzesId<
   TData = Awaited<ReturnType<typeof getQuizzesId>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1213,7 +1359,11 @@ export function useGetQuizzesId<
 
 export function useGetQuizzesId<
   TData = Awaited<ReturnType<typeof getQuizzesId>>,
-  TError = GetQuizzesId404,
+  TError =
+    | GetQuizzesId401
+    | GetQuizzesId403
+    | GetQuizzesId404
+    | GetQuizzesId500,
 >(
   id: string,
   options?: {
@@ -1289,7 +1439,13 @@ export const postQuizzesQuizIdQuestions = async (
 };
 
 export const getPostQuizzesQuizIdQuestionsMutationOptions = <
-  TError = PostQuizzesQuizIdQuestions401,
+  TError =
+    | PostQuizzesQuizIdQuestions400
+    | PostQuizzesQuizIdQuestions401
+    | PostQuizzesQuizIdQuestions403
+    | PostQuizzesQuizIdQuestions404
+    | PostQuizzesQuizIdQuestions409
+    | PostQuizzesQuizIdQuestions500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1332,13 +1488,24 @@ export type PostQuizzesQuizIdQuestionsMutationResult = NonNullable<
 export type PostQuizzesQuizIdQuestionsMutationBody =
   PostQuizzesQuizIdQuestionsBody;
 export type PostQuizzesQuizIdQuestionsMutationError =
-  PostQuizzesQuizIdQuestions401;
+  | PostQuizzesQuizIdQuestions400
+  | PostQuizzesQuizIdQuestions401
+  | PostQuizzesQuizIdQuestions403
+  | PostQuizzesQuizIdQuestions404
+  | PostQuizzesQuizIdQuestions409
+  | PostQuizzesQuizIdQuestions500;
 
 /**
  * @summary Add question to quiz
  */
 export const usePostQuizzesQuizIdQuestions = <
-  TError = PostQuizzesQuizIdQuestions401,
+  TError =
+    | PostQuizzesQuizIdQuestions400
+    | PostQuizzesQuizIdQuestions401
+    | PostQuizzesQuizIdQuestions403
+    | PostQuizzesQuizIdQuestions404
+    | PostQuizzesQuizIdQuestions409
+    | PostQuizzesQuizIdQuestions500,
   TContext = unknown,
 >(
   options?: {
@@ -1389,9 +1556,12 @@ export const postQuizzesQuestionsQuestionIdOptions = async (
 
 export const getPostQuizzesQuestionsQuestionIdOptionsMutationOptions = <
   TError =
+    | PostQuizzesQuestionsQuestionIdOptions400
     | PostQuizzesQuestionsQuestionIdOptions401
     | PostQuizzesQuestionsQuestionIdOptions403
-    | PostQuizzesQuestionsQuestionIdOptions404,
+    | PostQuizzesQuestionsQuestionIdOptions404
+    | PostQuizzesQuestionsQuestionIdOptions409
+    | PostQuizzesQuestionsQuestionIdOptions500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1444,18 +1614,24 @@ export type PostQuizzesQuestionsQuestionIdOptionsMutationResult = NonNullable<
 export type PostQuizzesQuestionsQuestionIdOptionsMutationBody =
   PostQuizzesQuestionsQuestionIdOptionsBodyItem[];
 export type PostQuizzesQuestionsQuestionIdOptionsMutationError =
+  | PostQuizzesQuestionsQuestionIdOptions400
   | PostQuizzesQuestionsQuestionIdOptions401
   | PostQuizzesQuestionsQuestionIdOptions403
-  | PostQuizzesQuestionsQuestionIdOptions404;
+  | PostQuizzesQuestionsQuestionIdOptions404
+  | PostQuizzesQuestionsQuestionIdOptions409
+  | PostQuizzesQuestionsQuestionIdOptions500;
 
 /**
  * @summary Add options to question
  */
 export const usePostQuizzesQuestionsQuestionIdOptions = <
   TError =
+    | PostQuizzesQuestionsQuestionIdOptions400
     | PostQuizzesQuestionsQuestionIdOptions401
     | PostQuizzesQuestionsQuestionIdOptions403
-    | PostQuizzesQuestionsQuestionIdOptions404,
+    | PostQuizzesQuestionsQuestionIdOptions404
+    | PostQuizzesQuestionsQuestionIdOptions409
+    | PostQuizzesQuestionsQuestionIdOptions500,
   TContext = unknown,
 >(
   options?: {
@@ -1510,7 +1686,13 @@ export const patchQuizzesQuizIdQuestionsQuestionIdReorder = async (
 };
 
 export const getPatchQuizzesQuizIdQuestionsQuestionIdReorderMutationOptions = <
-  TError = unknown,
+  TError =
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder400
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder401
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder403
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder404
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder409
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1570,13 +1752,25 @@ export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationResult =
   >;
 export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationBody =
   PatchQuizzesQuizIdQuestionsQuestionIdReorderBody;
-export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationError = unknown;
+export type PatchQuizzesQuizIdQuestionsQuestionIdReorderMutationError =
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder400
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder401
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder403
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder404
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder409
+  | PatchQuizzesQuizIdQuestionsQuestionIdReorder500;
 
 /**
  * @summary Reorder a question inside a quiz
  */
 export const usePatchQuizzesQuizIdQuestionsQuestionIdReorder = <
-  TError = unknown,
+  TError =
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder400
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder401
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder403
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder404
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder409
+    | PatchQuizzesQuizIdQuestionsQuestionIdReorder500,
   TContext = unknown,
 >(
   options?: {
@@ -1632,9 +1826,12 @@ export const patchQuizzesQuestionsBulk = async (
 
 export const getPatchQuizzesQuestionsBulkMutationOptions = <
   TError =
+    | PatchQuizzesQuestionsBulk400
     | PatchQuizzesQuestionsBulk401
     | PatchQuizzesQuestionsBulk403
-    | PatchQuizzesQuestionsBulk404,
+    | PatchQuizzesQuestionsBulk404
+    | PatchQuizzesQuestionsBulk409
+    | PatchQuizzesQuestionsBulk500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1677,18 +1874,24 @@ export type PatchQuizzesQuestionsBulkMutationResult = NonNullable<
 export type PatchQuizzesQuestionsBulkMutationBody =
   PatchQuizzesQuestionsBulkBodyItem[];
 export type PatchQuizzesQuestionsBulkMutationError =
+  | PatchQuizzesQuestionsBulk400
   | PatchQuizzesQuestionsBulk401
   | PatchQuizzesQuestionsBulk403
-  | PatchQuizzesQuestionsBulk404;
+  | PatchQuizzesQuestionsBulk404
+  | PatchQuizzesQuestionsBulk409
+  | PatchQuizzesQuestionsBulk500;
 
 /**
  * @summary Bulk update questions (autosave optimized)
  */
 export const usePatchQuizzesQuestionsBulk = <
   TError =
+    | PatchQuizzesQuestionsBulk400
     | PatchQuizzesQuestionsBulk401
     | PatchQuizzesQuestionsBulk403
-    | PatchQuizzesQuestionsBulk404,
+    | PatchQuizzesQuestionsBulk404
+    | PatchQuizzesQuestionsBulk409
+    | PatchQuizzesQuestionsBulk500,
   TContext = unknown,
 >(
   options?: {
@@ -1736,9 +1939,12 @@ export const patchQuizzesOptionsBulk = async (
 
 export const getPatchQuizzesOptionsBulkMutationOptions = <
   TError =
+    | PatchQuizzesOptionsBulk400
     | PatchQuizzesOptionsBulk401
     | PatchQuizzesOptionsBulk403
-    | PatchQuizzesOptionsBulk404,
+    | PatchQuizzesOptionsBulk404
+    | PatchQuizzesOptionsBulk409
+    | PatchQuizzesOptionsBulk500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1781,18 +1987,24 @@ export type PatchQuizzesOptionsBulkMutationResult = NonNullable<
 export type PatchQuizzesOptionsBulkMutationBody =
   PatchQuizzesOptionsBulkBodyItem[];
 export type PatchQuizzesOptionsBulkMutationError =
+  | PatchQuizzesOptionsBulk400
   | PatchQuizzesOptionsBulk401
   | PatchQuizzesOptionsBulk403
-  | PatchQuizzesOptionsBulk404;
+  | PatchQuizzesOptionsBulk404
+  | PatchQuizzesOptionsBulk409
+  | PatchQuizzesOptionsBulk500;
 
 /**
  * @summary Bulk update options (autosave optimized)
  */
 export const usePatchQuizzesOptionsBulk = <
   TError =
+    | PatchQuizzesOptionsBulk400
     | PatchQuizzesOptionsBulk401
     | PatchQuizzesOptionsBulk403
-    | PatchQuizzesOptionsBulk404,
+    | PatchQuizzesOptionsBulk404
+    | PatchQuizzesOptionsBulk409
+    | PatchQuizzesOptionsBulk500,
   TContext = unknown,
 >(
   options?: {
@@ -1844,7 +2056,9 @@ export const getPostQuizzesQuizIdPublishMutationOptions = <
     | PostQuizzesQuizIdPublish400
     | PostQuizzesQuizIdPublish401
     | PostQuizzesQuizIdPublish403
-    | PostQuizzesQuizIdPublish404,
+    | PostQuizzesQuizIdPublish404
+    | PostQuizzesQuizIdPublish409
+    | PostQuizzesQuizIdPublish500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1889,7 +2103,9 @@ export type PostQuizzesQuizIdPublishMutationError =
   | PostQuizzesQuizIdPublish400
   | PostQuizzesQuizIdPublish401
   | PostQuizzesQuizIdPublish403
-  | PostQuizzesQuizIdPublish404;
+  | PostQuizzesQuizIdPublish404
+  | PostQuizzesQuizIdPublish409
+  | PostQuizzesQuizIdPublish500;
 
 /**
  * @summary Publish a quiz after strict validation
@@ -1899,7 +2115,9 @@ export const usePostQuizzesQuizIdPublish = <
     | PostQuizzesQuizIdPublish400
     | PostQuizzesQuizIdPublish401
     | PostQuizzesQuizIdPublish403
-    | PostQuizzesQuizIdPublish404,
+    | PostQuizzesQuizIdPublish404
+    | PostQuizzesQuizIdPublish409
+    | PostQuizzesQuizIdPublish500,
   TContext = unknown,
 >(
   options?: {
@@ -1944,7 +2162,8 @@ export const getDeleteQuizzesQuizIdMutationOptions = <
   TError =
     | DeleteQuizzesQuizId401
     | DeleteQuizzesQuizId403
-    | DeleteQuizzesQuizId404,
+    | DeleteQuizzesQuizId404
+    | DeleteQuizzesQuizId500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1988,7 +2207,8 @@ export type DeleteQuizzesQuizIdMutationResult = NonNullable<
 export type DeleteQuizzesQuizIdMutationError =
   | DeleteQuizzesQuizId401
   | DeleteQuizzesQuizId403
-  | DeleteQuizzesQuizId404;
+  | DeleteQuizzesQuizId404
+  | DeleteQuizzesQuizId500;
 
 /**
  * @summary Delete a quiz by ID
@@ -1997,7 +2217,8 @@ export const useDeleteQuizzesQuizId = <
   TError =
     | DeleteQuizzesQuizId401
     | DeleteQuizzesQuizId403
-    | DeleteQuizzesQuizId404,
+    | DeleteQuizzesQuizId404
+    | DeleteQuizzesQuizId500,
   TContext = unknown,
 >(
   options?: {
@@ -2042,7 +2263,8 @@ export const getDeleteQuizzesQuestionsQuestionIdMutationOptions = <
   TError =
     | DeleteQuizzesQuestionsQuestionId401
     | DeleteQuizzesQuestionsQuestionId403
-    | DeleteQuizzesQuestionsQuestionId404,
+    | DeleteQuizzesQuestionsQuestionId404
+    | DeleteQuizzesQuestionsQuestionId500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2086,7 +2308,8 @@ export type DeleteQuizzesQuestionsQuestionIdMutationResult = NonNullable<
 export type DeleteQuizzesQuestionsQuestionIdMutationError =
   | DeleteQuizzesQuestionsQuestionId401
   | DeleteQuizzesQuestionsQuestionId403
-  | DeleteQuizzesQuestionsQuestionId404;
+  | DeleteQuizzesQuestionsQuestionId404
+  | DeleteQuizzesQuestionsQuestionId500;
 
 /**
  * @summary Delete a question by ID
@@ -2095,7 +2318,8 @@ export const useDeleteQuizzesQuestionsQuestionId = <
   TError =
     | DeleteQuizzesQuestionsQuestionId401
     | DeleteQuizzesQuestionsQuestionId403
-    | DeleteQuizzesQuestionsQuestionId404,
+    | DeleteQuizzesQuestionsQuestionId404
+    | DeleteQuizzesQuestionsQuestionId500,
   TContext = unknown,
 >(
   options?: {
@@ -2140,7 +2364,8 @@ export const getDeleteQuizzesOptionsOptionIdMutationOptions = <
   TError =
     | DeleteQuizzesOptionsOptionId401
     | DeleteQuizzesOptionsOptionId403
-    | DeleteQuizzesOptionsOptionId404,
+    | DeleteQuizzesOptionsOptionId404
+    | DeleteQuizzesOptionsOptionId500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2184,7 +2409,8 @@ export type DeleteQuizzesOptionsOptionIdMutationResult = NonNullable<
 export type DeleteQuizzesOptionsOptionIdMutationError =
   | DeleteQuizzesOptionsOptionId401
   | DeleteQuizzesOptionsOptionId403
-  | DeleteQuizzesOptionsOptionId404;
+  | DeleteQuizzesOptionsOptionId404
+  | DeleteQuizzesOptionsOptionId500;
 
 /**
  * @summary Delete an option by ID
@@ -2193,7 +2419,8 @@ export const useDeleteQuizzesOptionsOptionId = <
   TError =
     | DeleteQuizzesOptionsOptionId401
     | DeleteQuizzesOptionsOptionId403
-    | DeleteQuizzesOptionsOptionId404,
+    | DeleteQuizzesOptionsOptionId404
+    | DeleteQuizzesOptionsOptionId500,
   TContext = unknown,
 >(
   options?: {

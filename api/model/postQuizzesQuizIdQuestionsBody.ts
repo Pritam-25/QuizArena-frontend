@@ -7,7 +7,10 @@
  */
 
 export type PostQuizzesQuizIdQuestionsBody = {
-  /** @minLength 1 */
+  /**
+   * @minLength 3
+   * @maxLength 500
+   */
   questionText: string;
   type?: string;
   /** @minimum 0 */

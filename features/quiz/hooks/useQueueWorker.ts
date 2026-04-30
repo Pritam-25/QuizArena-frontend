@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
 import {
   usePostQuizzesQuestionsQuestionIdOptions,
@@ -7,11 +7,21 @@ import {
   usePatchQuizzesQuestionsBulk,
 } from '@/api/quiz/quiz';
 import type { QueueItem } from './autosaveQueue';
-import { saveItemToIndexedDB, deleteItemFromIndexedDB } from './autosaveQueue';
+import { QUEUE_PRIORITY } from './autosaveQueue';
 import { useQuizDraftStore } from '../store/useQuizDraftStore';
 
 const MAX_ATTEMPTS = 3;
-const PROCESSING_DELAY = 500; // ms between processing items
+const BASE_RETRY_DELAY = 1000; // 1 second base for exponential backoff
+const PROCESSING_DELAY = 100; // ms between processing items (faster drain when queue has items)
+const MAX_JITTER = 1000; // max 1 second jitter
+
+// Exponential backoff with jitter: 2^attempt * baseDelay + random jitter
+// Jitter prevents retry storms when multiple clients retry simultaneously
+function getRetryDelay(attempts: number): number {
+  const exponentialDelay = Math.pow(2, attempts) * BASE_RETRY_DELAY;
+  const jitter = Math.random() * MAX_JITTER;
+  return exponentialDelay + jitter;
+}
 
 /**
  * useQueueWorker
@@ -19,9 +29,30 @@ const PROCESSING_DELAY = 500; // ms between processing items
  * Background worker that processes the autosave queue.
  * Runs continuously, processing pending items one at a time.
  * Handles retries with exponential backoff.
+ * Pauses when offline, resumes when connection restored.
+ *
+ * Reactively processes queue whenever it changes (queueVersion increments).
  */
 export function useQueueWorker() {
-  const { updateEntityId, markEntityCreated } = useAutosaveQueueStore();
+  const { updateEntityId, markEntityCreated, queueVersion } =
+    useAutosaveQueueStore();
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  // Listen for online/offline events
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Mutations
   const { mutateAsync: createOptions } =
@@ -58,6 +89,11 @@ export function useQueueWorker() {
 
       switch (item.type) {
         case 'CREATE_OPTION': {
+          // [queue][create-option] Numbering starts from 1 for create
+          console.log(
+            `1. [queue][create-option] Sending create option(s) for questionId: ${item.questionId}`,
+            item
+          );
           // Batch all pending/processing CREATE_OPTION items for the same question.
           // Include 'processing' status because the trigger item was already marked as processing.
           const { queue } = useAutosaveQueueStore.getState();
@@ -83,6 +119,9 @@ export function useQueueWorker() {
               const queueItem = createOptionItems[i];
               const backendId = res.data[i]?.id;
               if (backendId) {
+                console.log(
+                  `2. [queue][create-option][response] Option created. TempId: ${queueItem.entityId}, BackendId: ${backendId}`
+                );
                 updateEntityId(queueItem.entityId, backendId);
                 reconcileOptionId(
                   item.questionId,
@@ -106,6 +145,11 @@ export function useQueueWorker() {
         }
 
         case 'UPDATE_OPTION': {
+          // [queue][update-option] Numbering starts from 1 for update
+          console.log(
+            `1. [queue][update-option] Sending update for optionId: ${item.entityId} in questionId: ${item.questionId}`,
+            item
+          );
           const payload = item.payload as {
             optionText: string;
             isCorrect: boolean;
@@ -126,6 +170,11 @@ export function useQueueWorker() {
         }
 
         case 'CREATE_QUESTION': {
+          // [queue][create-question] Numbering starts from 1 for create
+          console.log(
+            `1. [queue][create-question] Sending create question for quizId: ${item.quizId}`,
+            item
+          );
           const payload = item.payload as {
             questionText: string;
             type: string;
@@ -139,6 +188,9 @@ export function useQueueWorker() {
 
           if (res.data?.id) {
             const backendId = res.data.id;
+            console.log(
+              `2. [queue][create-question][response] Question created. TempId: ${item.entityId}, BackendId: ${backendId}`
+            );
             // Update queue with new entity ID
             updateEntityId(item.entityId, backendId);
             reconcileQuestionId(item.entityId, backendId);
@@ -152,6 +204,11 @@ export function useQueueWorker() {
         }
 
         case 'UPDATE_QUESTION': {
+          // [queue][update-question] Numbering starts from 1 for update
+          console.log(
+            `1. [queue][update-question] Sending update for questionId: ${item.entityId}`,
+            item
+          );
           const payload = item.payload as {
             id: string;
             questionText: string;
@@ -193,41 +250,102 @@ export function useQueueWorker() {
   );
 
   const processQueue = useCallback(async () => {
-    if (processingRef.current) return;
+    if (processingRef.current) {
+      console.log('[WORKER][processQueue] Already processing, skipping...');
+      return;
+    }
     processingRef.current = true;
 
     try {
-      const { queue, markProcessing, markSuccess, markFailed } =
-        useAutosaveQueueStore.getState();
-      // Find first pending item
-      const pendingItem = queue.find(q => q.status === 'pending');
+      const {
+        getNextPendingItem,
+        markProcessing,
+        markSuccess,
+        markFailed,
+        queue,
+      } = useAutosaveQueueStore.getState();
+
+      console.log(
+        '[WORKER][processQueue] Starting, queueVersion:',
+        queueVersion,
+        'Queue length:',
+        queue.length,
+        'Pending items:',
+        queue.filter(q => q.status === 'pending').length
+      );
+
+      // Get highest priority pending item that is ready for retry
+      const now = Date.now();
+      const pendingItem = getNextPendingItem();
+
+      // Check if item is ready for retry (respects nextRetryAt for exponential backoff)
+      if (
+        pendingItem &&
+        pendingItem.nextRetryAt &&
+        pendingItem.nextRetryAt > now
+      ) {
+        console.log(
+          '[WORKER][processQueue] Item not ready for retry yet:',
+          pendingItem.id,
+          'nextRetryAt:',
+          new Date(pendingItem.nextRetryAt).toISOString(),
+          'current:',
+          new Date(now).toISOString()
+        );
+        // Don't process this item yet - wait for next trigger
+        return;
+      }
 
       if (!pendingItem) {
+        console.log('[WORKER][processQueue] No pending items found, stopping');
         // No pending item, but keep polling
         return;
       }
 
+      console.log(
+        '[WORKER][processQueue] Selected item for processing:',
+        JSON.stringify({
+          id: pendingItem.id,
+          type: pendingItem.type,
+          clientId: pendingItem.clientId,
+          entityId: pendingItem.entityId,
+          status: pendingItem.status,
+          attempts: pendingItem.attempts,
+          version: pendingItem.version,
+          priority: QUEUE_PRIORITY[pendingItem.type],
+        })
+      );
+
       // Check if max attempts exceeded
       if (pendingItem.attempts >= MAX_ATTEMPTS) {
         console.error(
-          `Max attempts exceeded for item ${pendingItem.id}, dropping`
+          '[WORKER][processQueue] Max attempts exceeded for item',
+          pendingItem.id,
+          'attempts:',
+          pendingItem.attempts,
+          ', dropping'
         );
         markSuccess(pendingItem.id, pendingItem.clientId, pendingItem.type);
-        await deleteItemFromIndexedDB(pendingItem.id);
         return;
       }
 
+      console.log(
+        '[WORKER][processQueue] Marking item as processing:',
+        pendingItem.id
+      );
       markProcessing(pendingItem.id);
-      await saveItemToIndexedDB({
-        ...pendingItem,
-        status: 'processing',
-      });
 
       try {
+        console.log('[WORKER][processQueue] Executing item:', pendingItem.id);
         // executeItem returns ALL item IDs it processed (including the trigger item for
         // batch operations like CREATE_OPTION). We use a fresh queue snapshot here so
         // we're never working off a stale closure reference.
         const processedItemIds = await executeItem(pendingItem);
+
+        console.log(
+          '[WORKER][processQueue] Execute completed, processedItemIds:',
+          processedItemIds
+        );
 
         if (processedItemIds && processedItemIds.length > 0) {
           // Use a fresh snapshot so we resolve clientId/type for every batched item.
@@ -235,19 +353,29 @@ export function useQueueWorker() {
           for (const id of processedItemIds) {
             const batchedItem = freshQueue.find(q => q.id === id);
             if (batchedItem) {
+              console.log(
+                '[WORKER][processQueue] Marking success for item:',
+                batchedItem.id,
+                'type:',
+                batchedItem.type,
+                'clientId:',
+                batchedItem.clientId
+              );
               markSuccess(
                 batchedItem.id,
                 batchedItem.clientId,
                 batchedItem.type
               );
-              await deleteItemFromIndexedDB(id);
             }
           }
         } else {
           // Fallback: if executeItem returned nothing (non-batch path), clean up the
           // trigger item directly.
+          console.log(
+            '[WORKER][processQueue] No processedItemIds returned, marking trigger item as success:',
+            pendingItem.id
+          );
           markSuccess(pendingItem.id, pendingItem.clientId, pendingItem.type);
-          await deleteItemFromIndexedDB(pendingItem.id);
         }
       } catch (error: unknown) {
         // Handle 409 Conflict - don't retry, just drop
@@ -258,11 +386,10 @@ export function useQueueWorker() {
         if (err?.response?.status === 409) {
           console.warn(`Conflict error for item ${pendingItem.id}, dropping`);
           markSuccess(pendingItem.id, pendingItem.clientId, pendingItem.type);
-          await deleteItemFromIndexedDB(pendingItem.id);
           return;
         }
 
-        // Other errors - retry
+        // Other errors - retry with exponential backoff
         const errorMessage = err?.message || 'Unknown error';
         console.error(
           `Failed to process item ${pendingItem.id}:`,
@@ -274,28 +401,42 @@ export function useQueueWorker() {
           pendingItem.clientId,
           pendingItem.type
         );
-        await saveItemToIndexedDB({
-          ...pendingItem,
-          status: 'pending',
-          attempts: pendingItem.attempts + 1,
-          lastError: errorMessage,
-        });
+        // Schedule retry with exponential backoff delay
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        const retryDelay = getRetryDelay(pendingItem.attempts + 1);
+        timeoutRef.current = setTimeout(() => {
+          if (isMountedRef.current) {
+            processQueue();
+          }
+        }, retryDelay);
+        return;
       }
     } finally {
       processingRef.current = false;
       // Only schedule next processing if still mounted
       if (isMountedRef.current) {
-        timeoutRef.current = setTimeout(() => {
-          processQueue();
-        }, PROCESSING_DELAY);
+        // Check if there are more items to process
+        const { queue } = useAutosaveQueueStore.getState();
+        const hasPendingItems = queue.some(q => q.status === 'pending');
+
+        if (hasPendingItems) {
+          // Continue processing immediately (fast drain)
+          timeoutRef.current = setTimeout(() => {
+            processQueue();
+          }, PROCESSING_DELAY);
+        }
+        // No pending items - stop polling, wait for queueVersion change trigger
       }
     }
   }, [executeItem]);
-  // Start queue processor loop on mount
+
+  // Start queue processor loop on mount (initial trigger)
   useEffect(() => {
     isMountedRef.current = true;
     // Start the queue processor on mount
-    if (!processingRef.current) {
+    if (!processingRef.current && isOnline) {
       processQueue();
     }
     return () => {
@@ -304,5 +445,18 @@ export function useQueueWorker() {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [processQueue]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reactively trigger processing when queue changes (event-driven)
+  // This is the KEY FIX: worker responds to queue changes instead of polling
+  useEffect(() => {
+    if (isOnline && !processingRef.current) {
+      // Queue changed - check if there's work to do
+      const { queue } = useAutosaveQueueStore.getState();
+      const hasPendingItems = queue.some(q => q.status === 'pending');
+      if (hasPendingItems) {
+        processQueue();
+      }
+    }
+  }, [queueVersion, isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
 }

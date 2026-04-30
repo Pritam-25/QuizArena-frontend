@@ -13,7 +13,7 @@ import { SocketConnectionStatus } from '@/components/socket/SocketConnectionStat
 import { SocketDebug } from '@/components/socket/SocketDebug';
 import { AppError } from '@/lib/api/api-error';
 import { toast } from 'sonner';
-import { env } from '@/lib/env';
+import { AutosaveQueueProvider } from './AutosaveQueueProvider';
 
 /**
  * Creates a new QueryClient instance with default configuration.
@@ -99,13 +99,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SocketProvider>
-        {children}
-        {/* TEMP: Debug widget for socket state  */}
-        {process.env.NODE_ENV === 'development' && <SocketDebug />}
-        {/* Rendered inside SocketProvider so it can call useSocket() */}
-        <SocketStatusBridge />
-      </SocketProvider>
+      <AutosaveQueueProvider>
+        <SocketProvider>
+          {children}
+          {/* TEMP: Debug widget for socket state  */}
+          {process.env.NODE_ENV === 'development' && <SocketDebug />}
+          {/* Rendered inside SocketProvider so it can call useSocket() */}
+          <SocketStatusBridge />
+        </SocketProvider>
+      </AutosaveQueueProvider>
 
       {/* React Query Devtools (auto disabled in production) */}
       <ReactQueryDevtools initialIsOpen={false} />

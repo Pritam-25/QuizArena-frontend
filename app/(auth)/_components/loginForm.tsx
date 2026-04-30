@@ -7,12 +7,10 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import { loginSchema, LoginInput } from '@/lib/schemas/auth.schema';
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { PasswordInput } from './passwordInput';
 import { Loader2 } from 'lucide-react';
-import { usePostAuthLogin } from '@/api/auth/auth';
 import { useLogin } from '@/features/auth/hooks/useLogin';
 
 /**

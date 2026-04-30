@@ -6,7 +6,8 @@ import {
 } from '../store/useQuizDraftStore';
 import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
 
-const DEBOUNCE_MS = 2000;
+const QUESTION_DEBOUNCE_MS = 2000;
+const OPTION_DEBOUNCE_MS = 500; // Options debounce faster for snappier UX
 
 /**
  * useAutoSave
@@ -14,21 +15,28 @@ const DEBOUNCE_MS = 2000;
  * Handles debounced batch autosave for quiz questions and options.
  * Instead of calling APIs directly, it pushes items to the queue.
  * The queue worker processes items in order with retry logic.
+ *
+ * ARCHITECTURE:
+ * - Questions: debounced save per question
+ * - Options: debounced save per question (batched)
+ * - New options (temp_id) trigger CREATE_OPTION immediately
+ * - Existing options trigger UPDATE_OPTION
  */
 export function useAutoSave(quizId: string) {
   const markOptionSaving = useQuizDraftStore(state => state.markOptionSaving);
-
   const addToQueue = useAutosaveQueueStore(state => state.addToQueue);
 
   // Track pending saves - Map holds the in-flight promise to serialize per-question saves
   const pendingQuestionSaves = useRef<Map<string, Promise<void>>>(new Map());
-  const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const questionDebounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const optionDebounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const executeSaveWithSerializationRef = useRef<
     ((questionId: string) => Promise<void>) | null
   >(null);
 
   /**
    * Queue options for saving (handles both CREATE new and UPDATE existing)
+   * Called by both question autosave and option-level autosave
    */
   const queueOptions = useCallback(
     (questionId: string) => {
@@ -67,12 +75,14 @@ export function useAutoSave(quizId: string) {
           markOptionSaving(questionId, opt.id, true);
         });
 
+        const now = Date.now();
         newOptions.forEach(opt => {
           addToQueue({
             id: crypto.randomUUID(),
             type: 'CREATE_OPTION',
             entityId: opt.id,
             clientId: opt.id, // Use temp ID as stable clientId
+            idempotencyKey: `create_option:${quizId}:${questionId}:${opt.id}:${now}`, // unique idempotency key
             questionId,
             quizId,
             payload: {
@@ -81,7 +91,9 @@ export function useAutoSave(quizId: string) {
             },
             status: 'pending',
             attempts: 0,
-            createdAt: Date.now(),
+            createdAt: now,
+            updatedAt: now,
+            version: 1,
           });
         });
         console.log(
@@ -93,12 +105,14 @@ export function useAutoSave(quizId: string) {
 
       // UPDATE existing options - queue them (batch by grouping into single item)
       if (dirtyOptions.length > 0) {
+        const now = Date.now();
         dirtyOptions.forEach(opt => {
           addToQueue({
             id: crypto.randomUUID(),
             type: 'UPDATE_OPTION',
             entityId: opt.id,
             clientId: opt.id, // Use real ID as clientId for existing options
+            idempotencyKey: `update_option:${quizId}:${opt.id}:${now}`, // unique idempotency key
             questionId,
             quizId,
             payload: {
@@ -107,12 +121,37 @@ export function useAutoSave(quizId: string) {
             },
             status: 'pending',
             attempts: 0,
-            createdAt: Date.now(),
+            createdAt: now,
+            updatedAt: now,
+            version: 1,
           });
         });
       }
     },
     [addToQueue, markOptionSaving, quizId]
+  );
+
+  /**
+   * Schedule option autosave for a specific question
+   * This is the KEY FIX: options now have their own debounced trigger
+   * instead of only being saved when the question changes
+   */
+  const scheduleOptionSave = useCallback(
+    (questionId: string) => {
+      // Clear existing timer for this question's options
+      const existingTimer = optionDebounceTimers.current.get(questionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      // Schedule debounced option save
+      const timer = setTimeout(() => {
+        queueOptions(questionId);
+      }, OPTION_DEBOUNCE_MS);
+
+      optionDebounceTimers.current.set(questionId, timer);
+    },
+    [queueOptions]
   );
 
   /**
@@ -127,6 +166,7 @@ export function useAutoSave(quizId: string) {
 
       if (isTemp) {
         // CREATE new question - queue it
+        const now = Date.now();
         const payload = {
           questionText: question.questionText || '',
           type: QuestionType[question.type] || 'MCQ',
@@ -139,12 +179,15 @@ export function useAutoSave(quizId: string) {
           type: 'CREATE_QUESTION',
           entityId: questionId,
           clientId: questionId, // Use temp ID as stable clientId
+          idempotencyKey: `create_question:${quizId}:${questionId}:${now}`, // unique idempotency key
           questionId,
           quizId,
           payload,
           status: 'pending',
           attempts: 0,
-          createdAt: Date.now(),
+          createdAt: now,
+          updatedAt: now,
+          version: 1,
         });
 
         // Queue options separately (they'll be processed after question)
@@ -152,6 +195,7 @@ export function useAutoSave(quizId: string) {
       } else {
         // UPDATE existing question - queue if dirty
         if (question.isDirty) {
+          const now = Date.now();
           const payload = {
             id: questionId,
             questionText: question.questionText || '',
@@ -164,12 +208,15 @@ export function useAutoSave(quizId: string) {
             type: 'UPDATE_QUESTION',
             entityId: questionId,
             clientId: questionId, // Use real ID as clientId for existing questions
+            idempotencyKey: `update_question:${quizId}:${questionId}:${now}`, // unique idempotency key
             questionId,
             quizId,
             payload,
             status: 'pending',
             attempts: 0,
-            createdAt: Date.now(),
+            createdAt: now,
+            updatedAt: now,
+            version: 1,
           });
         }
 
@@ -214,12 +261,12 @@ export function useAutoSave(quizId: string) {
   }, [executeSaveWithSerialization]);
 
   /**
-   * Schedule autosave for a question
+   * Schedule autosave for a question (question text/metadata changes)
    */
   const scheduleAutoSave = useCallback(
     (questionId: string) => {
       // Clear existing timer for this question
-      const existingTimer = debounceTimers.current.get(questionId);
+      const existingTimer = questionDebounceTimers.current.get(questionId);
       if (existingTimer) {
         clearTimeout(existingTimer);
       }
@@ -227,9 +274,9 @@ export function useAutoSave(quizId: string) {
       // Schedule new debounced save
       const timer = setTimeout(() => {
         executeSaveWithSerialization(questionId);
-      }, DEBOUNCE_MS);
+      }, QUESTION_DEBOUNCE_MS);
 
-      debounceTimers.current.set(questionId, timer);
+      questionDebounceTimers.current.set(questionId, timer);
     },
     [executeSaveWithSerialization]
   );
@@ -250,11 +297,77 @@ export function useAutoSave(quizId: string) {
     [executeSaveWithSerialization]
   );
 
+  // Subscribe to option changes and trigger option autosave
+  // This is the KEY FIX: directly listen to store changes for options
+  useEffect(() => {
+    const unsubscribe = useQuizDraftStore.subscribe(
+      // Select all option-related state
+      state =>
+        Object.values(state.questions).flatMap(q =>
+          Object.values(q.options).map(opt => ({
+            questionId: q.id,
+            optionId: opt.id,
+            optionText: opt.optionText,
+            isCorrect: opt.isCorrect,
+            isDirty: opt.isDirty,
+            isSaving: opt.isSaving,
+          }))
+        ),
+      // Custom equality check to avoid unnecessary triggers
+      (newOptions, oldOptions) => {
+        if (newOptions.length !== oldOptions?.length) return false;
+        return newOptions.every(
+          (opt, i) =>
+            opt.optionText === oldOptions[i].optionText &&
+            opt.isCorrect === oldOptions[i].isCorrect &&
+            opt.isDirty === oldOptions[i].isDirty &&
+            opt.isSaving === oldOptions[i].isSaving
+        );
+      },
+      // Callback when options change
+      () => {
+        // Get all questions that have dirty or new options
+        const state = useQuizDraftStore.getState();
+        const questionsWithOptionChanges = new Set<string>();
+
+        Object.values(state.questions).forEach(question => {
+          const allOptions = Object.values(question.options);
+          const { isEntityCreated } = useAutosaveQueueStore.getState();
+
+          const hasNewOptions = allOptions.some(
+            opt =>
+              opt.id.startsWith('temp_') &&
+              opt.optionText.trim() &&
+              !opt.isSaving &&
+              !isEntityCreated(opt.id)
+          );
+
+          const hasDirtyOptions = allOptions.some(
+            opt => opt.isDirty && !opt.id.startsWith('temp_') && !opt.isSaving
+          );
+
+          if (hasNewOptions || hasDirtyOptions) {
+            questionsWithOptionChanges.add(question.id);
+          }
+        });
+
+        // Trigger option autosave for each affected question
+        questionsWithOptionChanges.forEach(questionId => {
+          scheduleOptionSave(questionId);
+        });
+      }
+    );
+
+    return () => unsubscribe();
+  }, [scheduleOptionSave]);
+
   // Cleanup timers on unmount
   useEffect(() => {
-    const timers = debounceTimers.current;
+    const questionTimers = questionDebounceTimers.current;
+    const optionTimers = optionDebounceTimers.current;
     return () => {
-      timers.forEach(timer => clearTimeout(timer));
+      questionTimers.forEach(timer => clearTimeout(timer));
+      optionTimers.forEach(timer => clearTimeout(timer));
     };
   }, []);
 

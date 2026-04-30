@@ -32,8 +32,14 @@ import type {
 
 import type {
   GetUsersId200,
+  GetUsersId401,
+  GetUsersId403,
   GetUsersId404,
+  GetUsersId500,
   PostUsers201,
+  PostUsers400,
+  PostUsers409,
+  PostUsers500,
   PostUsersBody,
 } from '../model';
 
@@ -61,7 +67,7 @@ export const postUsers = async (
 };
 
 export const getPostUsersMutationOptions = <
-  TError = unknown,
+  TError = PostUsers400 | PostUsers409 | PostUsers500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -102,12 +108,15 @@ export type PostUsersMutationResult = NonNullable<
   Awaited<ReturnType<typeof postUsers>>
 >;
 export type PostUsersMutationBody = PostUsersBody;
-export type PostUsersMutationError = unknown;
+export type PostUsersMutationError = PostUsers400 | PostUsers409 | PostUsers500;
 
 /**
  * @summary Create user
  */
-export const usePostUsers = <TError = unknown, TContext = unknown>(
+export const usePostUsers = <
+  TError = PostUsers400 | PostUsers409 | PostUsers500,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postUsers>>,
@@ -153,7 +162,7 @@ export const getGetUsersIdQueryKey = (id: string) => {
 
 export const getGetUsersIdInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -191,11 +200,15 @@ export const getGetUsersIdInfiniteQueryOptions = <
 export type GetUsersIdInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersId>>
 >;
-export type GetUsersIdInfiniteQueryError = GetUsersId404;
+export type GetUsersIdInfiniteQueryError =
+  | GetUsersId401
+  | GetUsersId403
+  | GetUsersId404
+  | GetUsersId500;
 
 export function useGetUsersIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options: {
@@ -222,7 +235,7 @@ export function useGetUsersIdInfinite<
 };
 export function useGetUsersIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -249,7 +262,7 @@ export function useGetUsersIdInfinite<
 };
 export function useGetUsersIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -272,7 +285,7 @@ export function useGetUsersIdInfinite<
 
 export function useGetUsersIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getUsersId>>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -332,7 +345,7 @@ export const useGetGetUsersIdInfiniteQueryData = () => {
 
 export const getGetUsersIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -366,11 +379,15 @@ export const getGetUsersIdQueryOptions = <
 export type GetUsersIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersId>>
 >;
-export type GetUsersIdQueryError = GetUsersId404;
+export type GetUsersIdQueryError =
+  | GetUsersId401
+  | GetUsersId403
+  | GetUsersId404
+  | GetUsersId500;
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options: {
@@ -393,7 +410,7 @@ export function useGetUsersId<
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -416,7 +433,7 @@ export function useGetUsersId<
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {
@@ -435,7 +452,7 @@ export function useGetUsersId<
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId404,
+  TError = GetUsersId401 | GetUsersId403 | GetUsersId404 | GetUsersId500,
 >(
   id: string,
   options?: {

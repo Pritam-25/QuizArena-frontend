@@ -7,5 +7,9 @@
  */
 
 export type PostUsersBody = {
+  /**
+   * @minLength 3
+   * @maxLength 100
+   */
   username: string;
 };

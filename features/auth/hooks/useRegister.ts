@@ -3,7 +3,7 @@ import { handleError } from '@/lib/api/handleError';
 import { useRouter } from 'next/navigation';
 import { useMutationHandler } from '@/lib/api/useMutationHandler';
 import { queryKeys } from '@/lib/api/keys';
-import { PostAuthRegister201Data, PostAuthRegisterBody } from '@/api/model';
+import { PostAuthRegister201Data } from '@/api/model';
 
 export function useRegister() {
   const router = useRouter();

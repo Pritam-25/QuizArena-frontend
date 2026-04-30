@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useQuizDraftStore } from '../store/useQuizDraftStore';
 import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
 
@@ -14,11 +14,19 @@ import { useAutosaveQueueStore } from '../store/useAutosaveQueueStore';
  * pending/processing item for this question already in the queue. This prevents
  * the cascade where reconcileOptionId / markOptionSaved writes trigger a fresh
  * scheduleAutoSave call that re-queues already-in-flight work.
+ *
+ * BATCHING: Uses a single ref to track if autosave has been scheduled for the
+ * current "batch" of changes. Multiple rapid updates (e.g., toggling isCorrect
+ * which updates multiple options) will only trigger ONE autosave call.
  */
 export function useQuestionAutosaveTrigger(
   questionId: string,
   scheduleAutoSave: (id: string) => void
 ) {
+  // Track if we've already scheduled autosave for this batch of changes
+  const scheduledRef = useRef(false);
+  const scheduleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Granular subscriptions — each re-renders independently
   const isDirty = useQuizDraftStore(
     state => state.questions[questionId]?.isDirty ?? false
@@ -58,32 +66,58 @@ export function useQuestionAutosaveTrigger(
           (q.status === 'pending' || q.status === 'processing')
       );
 
-  // Trigger autosave when question itself becomes dirty
+  // Single unified effect for both question and option changes
+  // This prevents multiple triggers when multiple updates happen in the same batch
   useEffect(() => {
-    if (isDirty && !isSaving && !hasPendingQueueItem()) {
-      scheduleAutoSave(questionId);
+    // Reset the scheduled flag when there's no dirty state
+    if (!isDirty && !hasDirtyOption) {
+      scheduledRef.current = false;
+      return;
     }
-    // hasPendingQueueItem is a stable function reference defined in this scope —
-    // ESLint exhaustive-deps does not need it in the array.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty, isSaving, questionId, scheduleAutoSave]);
 
-  // Trigger autosave when any option becomes dirty (separate from question dirty)
-  useEffect(() => {
-    if (
-      hasDirtyOption &&
-      !hasOptionSaveInFlight &&
-      !isSaving &&
-      !hasPendingQueueItem()
-    ) {
-      scheduleAutoSave(questionId);
+    // Don't schedule if already scheduled for this batch
+    if (scheduledRef.current) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // Don't schedule if currently saving
+    if (isSaving || hasOptionSaveInFlight) {
+      return;
+    }
+
+    // Don't schedule if there's already a pending queue item
+    if (hasPendingQueueItem()) {
+      return;
+    }
+
+    // Mark as scheduled and schedule autosave
+    scheduledRef.current = true;
+
+    // Clear any existing timeout
+    if (scheduleTimeoutRef.current) {
+      clearTimeout(scheduleTimeoutRef.current);
+    }
+
+    // Use a micro-delay to batch multiple rapid updates together
+    scheduleTimeoutRef.current = setTimeout(() => {
+      scheduledRef.current = false;
+      scheduleAutoSave(questionId);
+    }, 50); // 50ms batching window
   }, [
+    isDirty,
     hasDirtyOption,
-    hasOptionSaveInFlight,
     isSaving,
+    hasOptionSaveInFlight,
     questionId,
     scheduleAutoSave,
   ]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scheduleTimeoutRef.current) {
+        clearTimeout(scheduleTimeoutRef.current);
+      }
+    };
+  }, []);
 }
