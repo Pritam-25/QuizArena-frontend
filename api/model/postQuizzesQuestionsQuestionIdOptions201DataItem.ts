@@ -8,9 +8,7 @@
 
 export type PostQuizzesQuestionsQuestionIdOptions201DataItem = {
   id: string;
-  title: string;
-  /** @nullable */
-  description?: string | null;
-  isPublished: boolean;
-  createdBy: string;
+  questionId: string;
+  optionText: string;
+  isCorrect: boolean;
 };

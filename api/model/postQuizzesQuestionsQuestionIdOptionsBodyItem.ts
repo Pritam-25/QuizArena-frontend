@@ -8,9 +8,9 @@
 
 export type PostQuizzesQuestionsQuestionIdOptionsBodyItem = {
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
-  optionText?: string;
+   * @minLength 1
+   * @maxLength 200
+   */
+  optionText: string;
   isCorrect?: boolean;
 };

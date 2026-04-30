@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { io, type Socket } from "socket.io-client";
-import type { ClientToServerEvents, ServerToClientEvents } from "./socketTypes";
-import { env } from "@/lib/env";
+import { io, type Socket } from 'socket.io-client';
+import type { ClientToServerEvents, ServerToClientEvents } from './socketTypes';
+import { env } from '@/lib/env';
 
 /**
  * Typed socket handle used throughout the application.
@@ -19,7 +19,7 @@ let socket: AppSocket | null = null;
 export const getSocket = (): AppSocket => {
   if (!socket) {
     throw new Error(
-      "[socket] Not initialised. Call connectSocket() before getSocket()."
+      '[socket] Not initialised. Call connectSocket() before getSocket().'
     );
   }
   return socket;
@@ -53,8 +53,8 @@ export const connectSocket = (url?: string): AppSocket => {
   const socketUrl = url ?? env.NEXT_PUBLIC_SOCKET_URL;
 
   socket = io(socketUrl, {
-    withCredentials: true,       // Sends HttpOnly accessToken cookie automatically
-    transports: ["websocket"],   // Skip long-polling for lower latency
+    withCredentials: true, // Sends HttpOnly accessToken cookie automatically
+    transports: ['websocket'], // Skip long-polling for lower latency
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1_000,

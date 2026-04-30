@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { connectSocket, disconnectSocket } from "@/lib/socket/socket";
-import type { AppSocket } from "@/lib/socket/socket";
+import { useEffect, useState } from 'react';
+import { connectSocket, disconnectSocket } from '@/lib/socket/socket';
+import type { AppSocket } from '@/lib/socket/socket';
 import type {
   SocketErrorPayload,
   SocketReadyPayload,
-} from "@/lib/socket/socketTypes";
+} from '@/lib/socket/socketTypes';
 
 export interface SocketAuthState {
   /** The live socket instance (null when disabled or not yet created). */
@@ -83,8 +83,8 @@ export const useSocketAuth = (enabled = true): SocketAuthState => {
         // "io server disconnect" means the server deliberately closed the
         // socket (e.g. token expiry). Don't auto-reconnect — surface it.
         error:
-          reason === "io server disconnect"
-            ? "You were disconnected by the server."
+          reason === 'io server disconnect'
+            ? 'You were disconnected by the server.'
             : null,
       }));
     };
@@ -101,7 +101,7 @@ export const useSocketAuth = (enabled = true): SocketAuthState => {
       setState(prev => ({
         ...prev,
         isReconnecting: false,
-        error: "Unable to reconnect. Please refresh the page.",
+        error: 'Unable to reconnect. Please refresh the page.',
       }));
     };
 
@@ -110,7 +110,7 @@ export const useSocketAuth = (enabled = true): SocketAuthState => {
         ...prev,
         isConnected: false,
         isReconnecting: false,
-        error: err.message || "Failed to connect to the server.",
+        error: err.message || 'Failed to connect to the server.',
       }));
     };
 
@@ -126,25 +126,25 @@ export const useSocketAuth = (enabled = true): SocketAuthState => {
 
     // ── Register ──────────────────────────────────────────────────────────
 
-    s.on("connect", onConnect);
-    s.on("disconnect", onDisconnect);
-    s.on("connect_error", onConnectError);
-    s.on("socket:ready", onSocketReady);
-    s.on("socket:error", onSocketError);
+    s.on('connect', onConnect);
+    s.on('disconnect', onDisconnect);
+    s.on('connect_error', onConnectError);
+    s.on('socket:ready', onSocketReady);
+    s.on('socket:error', onSocketError);
     // Manager-level events (not on the socket itself in socket.io v4)
-    s.io.on("reconnect_attempt", onReconnectAttempt);
-    s.io.on("reconnect", onReconnect);
-    s.io.on("reconnect_failed", onReconnectFailed);
+    s.io.on('reconnect_attempt', onReconnectAttempt);
+    s.io.on('reconnect', onReconnect);
+    s.io.on('reconnect_failed', onReconnectFailed);
 
     return () => {
-      s.off("connect", onConnect);
-      s.off("disconnect", onDisconnect);
-      s.off("connect_error", onConnectError);
-      s.off("socket:ready", onSocketReady);
-      s.off("socket:error", onSocketError);
-      s.io.off("reconnect_attempt", onReconnectAttempt);
-      s.io.off("reconnect", onReconnect);
-      s.io.off("reconnect_failed", onReconnectFailed);
+      s.off('connect', onConnect);
+      s.off('disconnect', onDisconnect);
+      s.off('connect_error', onConnectError);
+      s.off('socket:ready', onSocketReady);
+      s.off('socket:error', onSocketError);
+      s.io.off('reconnect_attempt', onReconnectAttempt);
+      s.io.off('reconnect', onReconnect);
+      s.io.off('reconnect_failed', onReconnectFailed);
     };
   }, [enabled]);
 

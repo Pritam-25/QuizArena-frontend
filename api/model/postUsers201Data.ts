@@ -5,9 +5,8 @@
  * Versioned backend contract for auth, user, quiz, and session
  * OpenAPI spec version: 1.0.0
  */
+import type { PostUsers201DataUser } from './postUsers201DataUser';
 
 export type PostUsers201Data = {
-  id: string;
-  username: string;
-  email: string;
+  user: PostUsers201DataUser;
 };

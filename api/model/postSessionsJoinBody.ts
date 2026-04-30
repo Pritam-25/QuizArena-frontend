@@ -8,10 +8,10 @@
 
 export type PostSessionsJoinBody = {
   /** @minLength 1 */
-  joinCode?: string;
+  joinCode: string;
   /**
-     * @minLength 1
-     * @maxLength 30
-     */
-  nickname?: string;
+   * @minLength 1
+   * @maxLength 30
+   */
+  nickname: string;
 };

@@ -1,4 +1,4 @@
-import { defineConfig } from "orval";
+import { defineConfig } from 'orval';
 
 /**
  * Orval Configuration (v8.8.0 compatible)
@@ -22,7 +22,7 @@ export default defineConfig({
      * You can also copy it locally if needed.
      */
     input: {
-      target: "../backend/openapi/openapi.json",
+      target: '../backend/openapi/openapi.json',
     },
 
     output: {
@@ -33,22 +33,22 @@ export default defineConfig({
        * Splits API by tags (auth, user, quiz, etc.)
        * Helps maintain scalability in large projects.
        */
-      mode: "tags-split",
+      mode: 'tags-split',
 
       /**
        * Entry file for generated API
        */
-      target: "./api/index.ts",
+      target: './api/index.ts',
 
       /**
        * Folder for generated TypeScript schemas
        */
-      schemas: "./api/model",
+      schemas: './api/model',
 
       /**
        * Generate React Query hooks
        */
-      client: "react-query",
+      client: 'react-query',
 
       /**
        * Clean old generated files before regeneration
@@ -66,8 +66,8 @@ export default defineConfig({
          * Custom API client
          */
         mutator: {
-          path: "./lib/api/client.ts",
-          name: "apiClient",
+          path: './lib/api/client.ts',
+          name: 'apiClient',
         },
 
         /**
@@ -83,7 +83,7 @@ export default defineConfig({
         query: {
           useQuery: true,
           useInfinite: true,
-          useInfiniteQueryParam: "nextId",
+          useInfiniteQueryParam: 'nextId',
 
           options: {
             staleTime: 60 * 1000,

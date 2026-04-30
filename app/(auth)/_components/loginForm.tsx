@@ -1,21 +1,17 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { loginSchema, LoginInput } from "@/lib/schemas/auth.schema";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { PasswordInput } from "./passwordInput";
-import { Loader2 } from "lucide-react";
-import { usePostApiV1AuthLogin } from "@/api/auth/auth";
-import { handleMutation } from "@/lib/api/mutationWrapper";
-import { handleError } from "@/lib/api/handleError";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginInput } from '@/lib/schemas/auth.schema';
+import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
+import { PasswordInput } from './passwordInput';
+import { Loader2 } from 'lucide-react';
+import { useLogin } from '@/features/auth/hooks/useLogin';
 
 /**
  * LoginForm Component
@@ -25,53 +21,39 @@ import { handleError } from "@/lib/api/handleError";
  * - Uses React Query mutation (Orval generated)
  * - Displays validation + API errors
  * - Redirects user on successful login
- *
- * @returns {JSX.Element}
  */
 export function LoginForm({
   className,
   ...props
-}: React.ComponentProps<"div">) {
-  const router = useRouter();
-
+}: React.ComponentProps<'div'>) {
   /**
    * React Hook Form setup with Zod validation
    */
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
   /**
    * React Query mutation for login
    */
-  const { mutate, isPending } = usePostApiV1AuthLogin();
+  const { mutate, isPending } = useLogin();
 
   /**
    * Handles form submission
    *
    * @param {LoginInput} values - User login credentials
    */
+
   const onSubmit = (values: LoginInput) => {
-    mutate(
-      { data: values },
-      {
-        onSuccess: (res) => {
-          handleMutation(res, (_data, message) => {
-            toast.success(message || "Login successful");
-            router.replace("/");
-          });
-        },
-        onError: handleError,
-      }
-    );
+    mutate({ data: values });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="p-0">
           <form
@@ -85,7 +67,7 @@ export function LoginForm({
                   <div className="flex flex-col items-center text-center">
                     <h1 className="text-2xl font-bold">Welcome back</h1>
                     <p className="text-muted-foreground text-balance">
-                      Login to your Primetrade account
+                      Login to your QuizArena account
                     </p>
                   </div>
 
@@ -97,7 +79,7 @@ export function LoginForm({
                       type="email"
                       placeholder="m@example.com"
                       autoFocus
-                      {...form.register("email")}
+                      {...form.register('email')}
                     />
                     {form.formState.errors.email && (
                       <p className="text-sm text-destructive">
@@ -112,7 +94,7 @@ export function LoginForm({
                     <PasswordInput
                       id="password"
                       placeholder="••••••••"
-                      {...form.register("password")}
+                      {...form.register('password')}
                     />
                     {form.formState.errors.password && (
                       <p className="text-sm text-destructive">
@@ -134,14 +116,14 @@ export function LoginForm({
                           Logging in...
                         </span>
                       ) : (
-                        "Login"
+                        'Login'
                       )}
                     </Button>
                   </div>
 
                   {/* Footer */}
                   <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
+                    Don&apos;t have an account?{' '}
                     <Link
                       href="/signup"
                       className="underline underline-offset-4"

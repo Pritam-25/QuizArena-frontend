@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
 import {
   environmentManager,
   QueryClient,
   QueryClientProvider,
-} from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SocketProvider, useSocket } from "@/providers/SocketProvider";
-import { SocketConnectionStatus } from "@/components/socket/SocketConnectionStatus";
+} from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { SocketProvider, useSocket } from '@/providers/SocketProvider';
+import { SocketConnectionStatus } from '@/components/socket/SocketConnectionStatus';
 
 // TEMP: Debug widget for socket state
-import { SocketDebug } from "@/components/socket/SocketDebug";
-import { AppError } from "@/lib/api/api-error";
-import { toast } from "sonner";
-import { env } from "@/lib/env";
+import { SocketDebug } from '@/components/socket/SocketDebug';
+import { AppError } from '@/lib/api/api-error';
+import { toast } from 'sonner';
+import { AutosaveQueueProvider } from './AutosaveQueueProvider';
 
 /**
  * Creates a new QueryClient instance with default configuration.
@@ -36,11 +36,11 @@ function makeQueryClient(): QueryClient {
       },
       mutations: {
         retry: 0, // do not retry mutations by default
-        onError: (error) => {
+        onError: error => {
           if (error instanceof AppError) {
-            toast.error(error.message || "Something went wrong");
+            toast.error(error.message || 'Something went wrong');
           } else {
-            toast.error("Network error, please try again");
+            toast.error('Network error, please try again');
           }
         },
       },
@@ -99,13 +99,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SocketProvider>
-        {children}
-        {/* TEMP: Debug widget for socket state  */}
-        {process.env.NODE_ENV === "development" && <SocketDebug />}
-        {/* Rendered inside SocketProvider so it can call useSocket() */}
-        <SocketStatusBridge />
-      </SocketProvider>
+      <AutosaveQueueProvider>
+        <SocketProvider>
+          {children}
+          {/* TEMP: Debug widget for socket state  */}
+          {process.env.NODE_ENV === 'development' && <SocketDebug />}
+          {/* Rendered inside SocketProvider so it can call useSocket() */}
+          <SocketStatusBridge />
+        </SocketProvider>
+      </AutosaveQueueProvider>
 
       {/* React Query Devtools (auto disabled in production) */}
       <ReactQueryDevtools initialIsOpen={false} />

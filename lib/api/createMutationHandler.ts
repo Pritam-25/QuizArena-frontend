@@ -1,6 +1,6 @@
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { ApiSuccess } from "./apiResponse";
+import { QueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { ApiSuccess } from './apiResponse';
 
 /**
  * Prefill cache config
@@ -12,7 +12,7 @@ type SetDataConfig<TData> = {
 /**
  * Mutation factory config
  */
-type MutationConfig<TData> = {
+type MutationConfig<TData, TVariables> = {
   successMessage?: string;
 
   /**
@@ -23,7 +23,10 @@ type MutationConfig<TData> = {
   /**
    * Invalidate queries
    */
-  invalidate?: (() => readonly unknown[])[];
+  invalidate?: ((args: {
+    data: TData;
+    variables: TVariables;
+  }) => readonly unknown[])[];
 };
 
 /**
@@ -35,11 +38,11 @@ type MutationConfig<TData> = {
  * - cache prefill
  * - cache invalidation
  */
-export function createMutationHandler<TData>(
+export function createMutationHandler<TData, TVariables>(
   queryClient: QueryClient,
-  config?: MutationConfig<TData>,
+  config?: MutationConfig<TData, TVariables>
 ) {
-  return (res: ApiSuccess<TData>) => {
+  return (res: ApiSuccess<TData>, variables?: TVariables) => {
     const { data, message } = res;
 
     /**
@@ -63,10 +66,12 @@ export function createMutationHandler<TData>(
     /**
      *  Invalidate queries
      */
-    config?.invalidate?.forEach((getKey) => {
-      queryClient.invalidateQueries({
-        queryKey: getKey(),
-      });
+    config?.invalidate?.forEach(getKey => {
+      if (variables) {
+        queryClient.invalidateQueries({
+          queryKey: getKey({ data, variables }),
+        });
+      }
     });
   };
 }

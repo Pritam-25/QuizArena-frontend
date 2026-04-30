@@ -7,9 +7,9 @@
  */
 
 export type PostAuthRegisterBody = {
-  /** @minLength 1 */
-  username?: string;
-  email?: string;
-  /** @minLength 6 */
-  password?: string;
+  /** @minLength 3 */
+  username: string;
+  email: string;
+  /** @minLength 8 */
+  password: string;
 };

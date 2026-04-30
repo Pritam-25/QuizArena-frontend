@@ -7,5 +7,5 @@
  */
 
 export type PostSessionsBody = {
-  quizId?: string;
+  quizId: string;
 };

@@ -7,8 +7,11 @@
  */
 
 export type PostQuizzesQuizIdQuestionsBody = {
-  /** @minLength 1 */
-  questionText?: string;
+  /**
+   * @minLength 3
+   * @maxLength 500
+   */
+  questionText: string;
   type?: string;
   /** @minimum 0 */
   timeLimit?: number;

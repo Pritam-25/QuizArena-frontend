@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { createContext, useContext, type ReactNode } from "react";
-import { useSocketAuth, type SocketAuthState } from "@/hooks/useSocketAuth";
+import { createContext, useContext, type ReactNode } from 'react';
+import { useSocketAuth, type SocketAuthState } from '@/hooks/useSocketAuth';
 
 type SocketContextValue = SocketAuthState;
 
@@ -33,7 +33,10 @@ interface SocketProviderProps {
  * // Only connect when the user is logged in
  * <SocketProvider enabled={!!user}>{children}</SocketProvider>
  */
-export function SocketProvider({ enabled = true, children }: SocketProviderProps) {
+export function SocketProvider({
+  enabled = true,
+  children,
+}: SocketProviderProps) {
   const socketState = useSocketAuth(enabled);
 
   return (
@@ -56,8 +59,8 @@ export function useSocket(): SocketContextValue {
 
   if (!ctx) {
     throw new Error(
-      "[useSocket] Must be called inside a <SocketProvider>. " +
-        "Wrap your component tree with <SocketProvider>."
+      '[useSocket] Must be called inside a <SocketProvider>. ' +
+        'Wrap your component tree with <SocketProvider>.'
     );
   }
 
